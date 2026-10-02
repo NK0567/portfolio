@@ -1,0 +1,17 @@
+node_modules/
+dist/
+
+# Secrets : ne JAMAIS versionner
+.env
+.env.local
+.env.*.local
+
+# Fichiers envoyés par l'administration
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Divers
+*.log
+npm-debug.log*
+.DS_Store
+coverage/

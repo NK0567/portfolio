@@ -1,0 +1,330 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. AUTHENTIFICATION & SÉCURITÉ (RBAC / AUDIT)
+// ==========================================
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  GUEST
+}
+
+model User {
+  id               String       @id @default(uuid())
+  email            String       @unique
+  username         String       @unique
+  passwordHash     String
+  role             Role         @default(ADMIN)
+  isTwoFactorEnabled Boolean    @default(false)
+  twoFactorSecret  String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  sessions         Session[]
+  auditLogs        AuditLog[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String   @unique @db.VarChar(512)
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // ex: "PROJECT_CREATE", "LOGIN_FAILED"
+  resource  String   // ex: "Project", "Auth"
+  details   Json?    // Métadonnées sur les modifications (diffs, IPs)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// 2. CONFIGURATION GLOBALE & PERSONNALISATION
+// ==========================================
+
+model GlobalConfig {
+  id             String   @id @default("current_config")
+  siteName       String   @default("Personal Brand Platform")
+  isAvailable    Boolean  @default(true) // Statut de disponibilité
+  freelanceStatus String? // "Disponible", "Occupé", etc.
+  themeConfig    Json     // Palette, polices, layouts personnalisés
+  seoConfig      Json     // Balises meta par défaut (FR/EN)
+  socialLinks    Json     // { linkedin: "...", github: "..." }
+  languages      Json     // Langues activées ex: ["fr", "en"]
+  sectionOrder   Json     // Ordre d'affichage des sections par glisser-déposer
+  updatedAt      DateTime @updatedAt
+}
+
+// ==========================================
+// 3. CONTENUS DU PORTFOLIO (MULTI-LANGUE VIA JSON)
+// ==========================================
+
+model Profile {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  avatarUrl String?
+  cvUrlFr   String?
+  cvUrlEn   String?
+  bio       Json     // { fr: "...", en: "..." }
+  titles    Json     // { fr: ["Développeur Fullstack"], en: ["Fullstack Developer"] }
+
+  // Coordonnees imprimees sur le CV genere
+  email      String?
+  phone      String?
+  phoneAlt   String?
+  location   String?
+  birthDate  DateTime?
+  // Libelle sous le nom : { fr: "Développeur Full-Stack", en: "..." }
+  headline   Json?
+  // [{ name: "Français", level: "courant" }, ...]
+  languages  Json?
+  // Centres d'interet, qualites : { fr: [...], en: [...] }
+  interests  Json?
+
+  updatedAt DateTime @updatedAt
+}
+
+/// Diplomes et formations, alimentent la section FORMATION du CV genere.
+model Education {
+  id          String    @id @default(uuid())
+  degree      Json      // { fr: "Master professionnel...", en: "..." }
+  school      String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  description Json?     // { fr: "...", en: "..." }
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([startDate])
+}
+
+model Skill {
+  id          String             @id @default(uuid())
+  name        String             @unique
+  category    SkillCategory
+  level       Int                // Pourcentage (0-100)
+  yearsOfExp  Int
+  logoUrl     String?
+  description Json?              // { fr: "...", en: "..." }
+  order       Int                @default(0)
+  projects    ProjectSkill[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+enum SkillCategory {
+  FRONTEND
+  BACKEND
+  MOBILE
+  CLOUD
+  CYBERSECURITY
+  DEVOPS
+  DATABASE
+  OTHER
+}
+
+model Project {
+  id             String         @id @default(uuid())
+  slug           String         @unique
+  title          String
+  description    Json           // { fr: "...", en: "..." }
+  content        Json           // { fr: "Détails, architecture, leçons...", en: "..." }
+  mainImage      String
+  images         Json           // Tableau d'URLs de captures d'écran
+  videoUrl       String?
+  githubUrl      String?
+  demoUrl        String?
+  documentation  String?        @db.Text
+  status         ProjectStatus  @default(DEVELOPMENT)
+  architecture   Json?          // Stockage de diagrammes / specs structures
+  features       Json           // { fr: ["Feature 1"], en: ["Feature 1"] }
+  challenges     Json?          // { fr: "Difficultés et solutions", en: "..." }
+  order          Int            @default(0)
+  date           DateTime
+  skills         ProjectSkill[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+enum ProjectStatus {
+  COMPLETED
+  DEVELOPMENT
+  MAINTENANCE
+  ARCHIVED
+}
+
+model ProjectSkill {
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  skillId   String
+  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, skillId])
+}
+
+model Experience {
+  id          String   @id @default(uuid())
+  company     String
+  logoUrl     String?
+  location    String
+  role        Json     // { fr: "...", en: "..." }
+  description Json     // { fr: "...", en: "..." }
+  achievements Json    // { fr: ["Succès 1"], en: ["Success 1"] }
+  startDate   DateTime
+  endDate     DateTime? // Null si poste actuel
+  isCurrent   Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Certification {
+  id             String    @id @default(uuid())
+  name           String
+  issuer         String
+  issueDate      DateTime
+  expiryDate     DateTime?
+  credentialId   String?
+  credentialUrl  String?
+  imageUrl       String?
+  pdfUrl         String?
+  order          Int       @default(0)
+}
+
+// ==========================================
+// 4. LABS DE CYBERSÉCURITÉ & ARCHIVES COMPLÉMENTAIRES
+// ==========================================
+
+/// Labs de sécurité (HTB, TryHackMe, Root-Me...) avec write-up hébergé ici.
+///
+/// Le write-up vit dans la base et non sur Medium : le visiteur reste sur le
+/// site, et Google indexe ce contenu sous ton domaine. `writeUpUrl` ne sert
+/// plus qu'à pointer vers un complément externe (dépôt de scripts, PoC).
+/// Rien n'est visible publiquement tant que `isPublished` vaut false.
+model CyberLab {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  platform    String   // HTB, TryHackMe, Root-Me, Custom
+  difficulty  String   // Easy, Medium, Hard, Insane
+  category    String?  // Web, Active Directory, Linux, Windows, Crypto...
+  badgeUrl    String?
+  writeUpUrl  String?  // Complément externe : dépôt de scripts, PoC
+  summary     Json     // { fr: "La faille exploitée, en deux phrases", en: "..." }
+  content     Json     // { fr: "Write-up : reconnaissance, exploitation, élévation", en: "..." }
+  remediation Json     // { fr: "Correctifs recommandés", en: "..." }
+  techniques  Json     // ["SQL injection", "Kerberoasting"]
+  tools       Json     // ["nmap", "Burp Suite"]
+  isPublished Boolean  @default(false)
+  order       Int      @default(0)
+  completedAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, completedAt])
+}
+
+// ==========================================
+// 5. SERVICES, BLOG & INTERACTIONS VISITEURS
+// ==========================================
+
+model Service {
+  id          String   @id @default(uuid())
+  title       Json     // { fr: "...", en: "..." }
+  description Json     // { fr: "...", en: "..." }
+  icon        String   // Identifiant de l'icône (Lucide/React Icons)
+  price       String?  // Optionnel
+  order       Int      @default(0)
+}
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       Json     // { fr: "...", en: "..." }
+  content     Json     // { fr: "Markdown/HTML", en: "Markdown/HTML" }
+  coverImage  String
+  tags        Json     // Tableau de chaînes ["Nextjs", "Cybersecurity"]
+  isPublished Boolean  @default(false)
+  viewCount   Int      @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactMessage {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  subject    String?
+  message    String   @db.Text
+  isRead     Boolean  @default(false)
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
+
+// ==========================================
+// 6. ANALYTICS & TRAFIC (RGPD COMPLIANT / ANONYMISÉ)
+// ==========================================
+
+model AnalyticsMetric {
+  id         String   @id @default(uuid())
+  event      String   // "PAGE_VIEW", "CV_DOWNLOAD", "CLICK_GITHUB"
+  path       String   // Page visitée ou ressource cliquée
+  country    String   @default("Unknown")
+  browser    String   @default("Unknown")
+  os         String   @default("Unknown")
+  device     String   @default("Unknown") // Desktop, Mobile, Tablet
+  createdAt  DateTime @default(now())
+}
+/// Lettres de motivation. Réservé à l'administration : aucune route publique
+/// n'expose ce modèle, et aucune relation ne le rattache au portfolio visible.
+///
+/// Choix volontaire : une lettre = une langue, et non un champ bilingue
+/// { fr, en } comme ailleurs dans le schéma. Une lettre de motivation n'est
+/// pas une traduction, c'est un texte réécrit pour un marché donné. Garder
+/// les deux versions dans un même enregistrement forcerait à les modifier
+/// ensemble alors qu'on n'en envoie jamais qu'une. La duplication vers une
+/// autre langue se fait par l'action « Dupliquer ».
+model CoverLetter {
+  id          String   @id @default(uuid())
+
+  title       String
+  lang        String   @default("fr")
+
+  company     String?
+  position    String?
+  recipient   String?
+  companyCity String?
+
+  subject     String
+  salutation  String
+  body        Json
+  closing     String   @db.Text
+  signature   String?
+
+  isDefault   Boolean  @default(false)
+  isArchived  Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isArchived, updatedAt])
+}

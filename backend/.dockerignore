@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.env.*
+public/uploads/*
+*.log
+.qodo
+check-prisma.js
+ETAPE-3.md

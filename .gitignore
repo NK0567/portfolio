@@ -1,0 +1,25 @@
+# root
+.env
+.env.*
+
+# frontend
+frontend/.env.local
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# backend
+backend/.env
+backend/.env.*
+backend/node_modules/
+backend/dist/
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
+
+# general
+.DS_Store
+*.log
+
+# Les modèles de configuration, eux, sont versionnés
+!.env.example
+!**/.env.example
