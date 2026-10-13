@@ -13,16 +13,16 @@ import './globals.css';
  */
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
+// Polices variables (sans liste de graisses) : un seul fichier par police,
+// plus léger et plus fiable à télécharger pendant la compilation.
 const grotesk = Space_Grotesk({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
   variable: '--font-grotesk',
   display: 'swap',
 });
 
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
-  weight: ['400', '500'],
   variable: '--font-jetbrains',
   display: 'swap',
 });

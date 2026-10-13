@@ -52,15 +52,21 @@ Compatible MySQL, plusieurs Go gratuits, se réveille seule.
 
 Dans les deux cas, un caractère spécial du mot de passe s'encode : `@` → `%40`, `#` → `%23`, `:` → `%3A`.
 
-### Copier tes données actuelles (facultatif)
+### Créer les tables et copier tes données
 
-Pour retrouver en ligne ce que tu as déjà saisi en local, exporte puis importe la base :
+Depuis ton ordinateur, avec ton MySQL local démarré, dans un terminal PowerShell ouvert sur le dossier `backend` :
 
-```bash
-mysqldump -u root -p --no-create-info --skip-triggers --ignore-table=portfolio_db._prisma_migrations portfolio_db > donnees.sql
+```powershell
+npm run uploads:import
+$env:DATABASE_URL="<chaîne de l'étape 2>"; npx prisma migrate deploy; Remove-Item Env:DATABASE_URL
+$env:TARGET_DATABASE_URL="<chaîne de l'étape 2>"; npm run db:copy
 ```
 
-Crée d'abord les tables en ligne (étape 3 : Render le fait au premier démarrage), puis importe `donnees.sql` dans la base en ligne avec MySQL Workbench ou l'éditeur SQL du service. Avant l'export, lance `npm run uploads:import` dans `backend` pour copier en base les images restées sur le disque.
+1. La première ligne range en base les images restées sur ton disque.
+2. La deuxième crée les tables dans la base en ligne.
+3. La troisième y copie tout ton contenu, compte administrateur compris : tu te connecteras en ligne avec le même e-mail et le même mot de passe qu'en local.
+
+Le script peut être relancé sans créer de doublons.
 
 ## 3. Déployer l'API sur Render
 
@@ -69,11 +75,9 @@ Crée d'abord les tables en ligne (étape 3 : Render le fait au premier démarra
 3. Renseigne les variables demandées :
    - `DATABASE_URL` : la chaîne de l'étape 2
    - `CORS_ORIGIN` : `https://<ton-nom>.vercel.app` (adresse connue à l'étape 4, modifiable ensuite)
-   - `SEED_ADMIN_EMAIL`, `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` : ton compte admin (mot de passe de 12 caractères minimum)
-4. Lance le déploiement. Au démarrage, l'API applique les migrations : les tables se créent seules.
-5. Crée le compte admin, une seule fois : onglet *Shell* du service, puis `npm run db:seed`.
-   (Si le Shell n'est pas disponible sur l'offre gratuite, lance le seed depuis ton ordinateur en mettant temporairement l'URL de la base en ligne dans `backend/.env`.)
-6. Vérifie : `https://portfolio-api.onrender.com/health` doit répondre `"database":"OK"`.
+   - `SEED_ADMIN_EMAIL`, `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` : laisse-les vides, ton compte a été copié à l'étape 2
+4. Lance le déploiement. Au démarrage, l'API applique les éventuelles migrations manquantes.
+5. Vérifie : `https://portfolio-api.onrender.com/health` doit répondre `"database":"OK"`.
 
 ## 4. Déployer le site sur Vercel
 

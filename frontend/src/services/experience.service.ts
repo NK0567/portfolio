@@ -4,6 +4,8 @@ import type { ApiResponse, Experience, I18nText, I18nList } from '@/types/api';
 export interface ExperienceFormInput {
   company: string;
   location: string;
+  /** Chemin du logo de l'entreprise, null pour le retirer. */
+  logoUrl?: string | null;
   role: I18nText;
   description: I18nText;
   achievements?: I18nList;
