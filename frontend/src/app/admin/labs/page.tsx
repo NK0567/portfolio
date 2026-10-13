@@ -426,7 +426,7 @@ export default function LabsPage() {
                 </div>
                 <div>
                   <label className={labelClass}>Ordre</label>
-                  <input type="number" min={0} value={form.order} onChange={(e) => set('order', Number(e.target.value) || 0)} className={`${inputClass} w-20`} />
+                  <input type="number" min={0} value={form.order} onChange={(e) => set('order', Number(e.target.value) || 0)} className={`${inputClass} !w-20`} />
                 </div>
               </div>
 

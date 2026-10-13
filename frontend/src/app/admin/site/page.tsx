@@ -40,6 +40,19 @@ const hint = 'mt-1 text-xs text-slate-400';
 const card =
   'rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900';
 
+/** Exemple affiché dans la case de l'adresse, selon le réseau choisi. */
+const LINK_PLACEHOLDERS: Record<string, string> = {
+  github: 'https://github.com/ton-compte',
+  linkedin: 'https://www.linkedin.com/in/ton-profil',
+  email: 'toi@exemple.com',
+  whatsapp: 'https://wa.me/237600000000',
+  twitter: 'https://x.com/ton-compte',
+  telegram: 'https://t.me/ton-compte',
+  youtube: 'https://youtube.com/@ta-chaine',
+  instagram: 'https://instagram.com/ton-compte',
+  facebook: 'https://facebook.com/ton-compte',
+};
+
 /** Réseaux proposés d'office. La liste reste ouverte, c'est juste un raccourci. */
 const KNOWN_NETWORKS = [
   'github',
@@ -427,7 +440,7 @@ export default function SiteConfigPage() {
               {social.map((row, index) => (
                 <div key={index} className="flex gap-2">
                   <input
-                    className={`${input} w-40 shrink-0`}
+                    className={`${input} !w-28 shrink-0 sm:!w-40`}
                     list="reseaux"
                     placeholder="github"
                     value={row.key}
@@ -438,8 +451,8 @@ export default function SiteConfigPage() {
                     }
                   />
                   <input
-                    className={input}
-                    placeholder="https://github.com/..."
+                    className={`${input} min-w-0 flex-1`}
+                    placeholder={LINK_PLACEHOLDERS[row.key.trim().toLowerCase()] ?? 'https://...'}
                     value={row.value}
                     onChange={(e) =>
                       setSocial((rows) =>
