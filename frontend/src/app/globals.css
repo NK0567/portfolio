@@ -1,6 +1,13 @@
 @import 'tailwindcss';
 
+/*
+ * Le mode sombre de l'administration suit la classe `.dark` posée par
+ * next-themes (bouton soleil / lune), et non la seule préférence du système.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
+  /* ---------- Jetons shadcn (administration) ---------- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -20,17 +27,42 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* ---------- Jetons du site public ----------
+   * Ils étaient décrits dans globals.append.css mais n'avaient jamais été
+   * intégrés ici : toutes les classes text-ink, bg-paper, text-signal du
+   * site public pointaient vers des couleurs inexistantes. */
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-signal: var(--signal);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --color-graphite: var(--graphite);
+  --color-haze: var(--haze);
+  --color-rule: var(--rule);
+  --color-success: var(--success);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
+  --animate-spin-slow: spin 18s linear infinite;
+  --animate-blink: blink 1s step-end infinite;
 }
 
 @layer base {
   :root {
+    /* Administration, mode clair */
     --background: #ffffff;
     --foreground: #0f172a;
     --card: #ffffff;
     --card-foreground: #0f172a;
     --popover: #ffffff;
     --popover-foreground: #0f172a;
-    --primary: #2563eb;
+    --primary: #4f46e5;
     --primary-foreground: #ffffff;
     --secondary: #f1f5f9;
     --secondary-foreground: #0f172a;
@@ -42,7 +74,29 @@
     --destructive-foreground: #ffffff;
     --border: #e2e8f0;
     --input: #e2e8f0;
-    --ring: #2563eb;
+    --ring: #4f46e5;
+
+    /*
+     * Site public : une seule palette, nuit bleu profond et néons.
+     *
+     * Pas de variante claire. L'identité visuelle repose sur la lumière
+     * émise par les scènes 3D et les lueurs : sur fond blanc elle
+     * disparaît, et maintenir deux versions d'une scène 3D double le
+     * travail pour un rendu toujours moins bon dans l'une des deux.
+     *
+     * --signal et --cyan sont pilotés depuis l'écran Site de
+     * l'administration. Le violet sert de troisième ton aux dégradés.
+     */
+    --paper: #050a18;
+    --surface: #0a1428;
+    --ink: #eef3ff;
+    --graphite: #b9c6e0;
+    --haze: #7e8db0;
+    --rule: #1a2a4d;
+    --signal: #3b82f6;
+    --cyan: #22d3ee;
+    --violet: #8b5cf6;
+    --success: #34d399;
   }
 
   .dark {
@@ -52,7 +106,7 @@
     --card-foreground: #f8fafc;
     --popover: #0f172a;
     --popover-foreground: #f8fafc;
-    --primary: #3b82f6;
+    --primary: #6366f1;
     --primary-foreground: #ffffff;
     --secondary: #1e293b;
     --secondary-foreground: #f8fafc;
@@ -64,13 +118,262 @@
     --destructive-foreground: #f8fafc;
     --border: #1e293b;
     --input: #1e293b;
-    --ring: #3b82f6;
+    --ring: #6366f1;
   }
-}
 
-@layer base {
   body {
     background-color: var(--background);
     color: var(--foreground);
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Ancres hautes : sans cela, le titre de section passe sous l'en-tête fixe. */
+  [id] {
+    scroll-margin-top: 5.5rem;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /*
+   * Mouvement réduit respecté : les personnes que les animations rendent
+   * malades l'ont réglé dans leur système. Les scènes 3D lisent le même
+   * réglage et s'affichent figées.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Site public
+   ========================================================================== */
+
+@layer components {
+  .public-site {
+    color-scheme: dark;
+    background-color: var(--paper);
+    color: var(--graphite);
+    min-height: 100vh;
+    position: relative;
+    isolation: isolate;
+    overflow-x: clip;
+  }
+
+  .public-site ::selection {
+    background: color-mix(in oklab, var(--signal) 45%, transparent);
+    color: #fff;
+  }
+
+  /*
+   * Fond commun : halos colorés, grille qui s'efface vers le bas, et une
+   * lueur qui suit la souris (--mx, --my posées par CursorGlow). Fixe et
+   * peint par le navigateur : aucun coût au défilement.
+   */
+  .site-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(600px circle at var(--mx, 50%) var(--my, 30%), color-mix(in oklab, var(--signal) 9%, transparent), transparent 60%),
+      radial-gradient(900px 600px at 85% -10%, color-mix(in oklab, var(--violet) 18%, transparent), transparent 70%),
+      radial-gradient(800px 500px at -10% 20%, color-mix(in oklab, var(--signal) 16%, transparent), transparent 70%),
+      var(--paper);
+  }
+
+  .site-backdrop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--signal) 7%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--signal) 7%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+  }
+
+  /* Carte en verre dépoli. */
+  .glass {
+    position: relative;
+    background: linear-gradient(160deg, color-mix(in oklab, var(--surface) 88%, transparent), color-mix(in oklab, var(--paper) 70%, transparent));
+    border: 1px solid color-mix(in oklab, var(--signal) 18%, transparent);
+    border-radius: 1rem;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow:
+      0 1px 0 0 color-mix(in oklab, #fff 6%, transparent) inset,
+      0 20px 50px -30px color-mix(in oklab, var(--signal) 45%, transparent);
+  }
+
+  .glass-hover {
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  }
+
+  .glass-hover:hover {
+    border-color: color-mix(in oklab, var(--cyan) 45%, transparent);
+    box-shadow:
+      0 1px 0 0 color-mix(in oklab, #fff 8%, transparent) inset,
+      0 0 0 1px color-mix(in oklab, var(--cyan) 15%, transparent),
+      0 24px 60px -24px color-mix(in oklab, var(--signal) 60%, transparent);
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, var(--cyan), var(--signal) 45%, var(--violet));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  .btn-primary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(100deg, var(--signal), var(--violet));
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, #fff 14%, transparent) inset,
+      0 10px 30px -8px color-mix(in oklab, var(--signal) 70%, transparent);
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.12);
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, #fff 20%, transparent) inset,
+      0 14px 40px -8px color-mix(in oklab, var(--cyan) 70%, transparent);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    transform: none;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+    border: 1px solid color-mix(in oklab, var(--signal) 40%, transparent);
+    background: color-mix(in oklab, var(--signal) 8%, transparent);
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--cyan);
+    background: color-mix(in oklab, var(--cyan) 12%, transparent);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--graphite);
+    border: 1px solid color-mix(in oklab, var(--signal) 28%, transparent);
+    background: color-mix(in oklab, var(--signal) 10%, transparent);
+  }
+
+  /* Pastille lumineuse pour les icônes. */
+  .neon-ring {
+    border: 1px solid color-mix(in oklab, var(--cyan) 50%, transparent);
+    background: radial-gradient(circle at 50% 35%, color-mix(in oklab, var(--signal) 35%, transparent), color-mix(in oklab, var(--paper) 90%, transparent) 70%);
+    box-shadow:
+      0 0 24px -4px color-mix(in oklab, var(--signal) 80%, transparent),
+      0 0 0 4px color-mix(in oklab, var(--signal) 8%, transparent);
+  }
+
+  /* Champ de formulaire du site public. */
+  .field {
+    width: 100%;
+    margin-top: 0.4rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--paper) 60%, transparent);
+    padding: 0.7rem 0.9rem;
+    font-size: 0.875rem;
+    color: var(--ink);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field::placeholder {
+    color: color-mix(in oklab, var(--haze) 70%, transparent);
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--signal);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--signal) 22%, transparent);
+  }
+
+  /* Coloration syntaxique de la section Code. */
+  .tok-k { color: #c084fc; }
+  .tok-s { color: #34d399; }
+  .tok-n { color: #fbbf24; }
+  .tok-c { color: #5b6b8f; font-style: italic; }
+  .tok-f { color: #60a5fa; }
+  .tok-p { color: #22d3ee; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -40; }
+}
+
+@keyframes scroll-dot {
+  0% { transform: translateY(0); opacity: 1; }
+  70% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
 }

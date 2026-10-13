@@ -60,8 +60,8 @@ export const DEFAULT_CONFIG = {
   isAvailable: true,
   freelanceStatus: 'Disponible',
   themeConfig: {
-    primaryColor: '#0f172a',
-    accentColor: '#2563eb',
+    primaryColor: '#22d3ee',
+    accentColor: '#3b82f6',
     defaultMode: 'system',
     fontHeading: 'Inter',
     fontBody: 'Inter',
@@ -74,5 +74,5 @@ export const DEFAULT_CONFIG = {
   },
   socialLinks: {},
   languages: ['fr', 'en'],
-  sectionOrder: ['hero', 'about', 'skills', 'projects', 'experience', 'contact'],
+  sectionOrder: ['stack', 'projects', 'code', 'skills', 'devops', 'security', 'experience', 'contact'],
 };

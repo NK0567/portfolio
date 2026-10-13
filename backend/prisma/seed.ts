@@ -97,8 +97,8 @@ async function main(): Promise<void> {
       isAvailable: true,
       freelanceStatus: 'Disponible',
       themeConfig: {
-        primaryColor: '#0f172a',
-        accentColor: '#2563eb',
+        primaryColor: '#22d3ee',
+        accentColor: '#3b82f6',
         defaultMode: 'system',
         fontHeading: 'Inter',
         fontBody: 'Inter',
@@ -114,7 +114,7 @@ async function main(): Promise<void> {
       },
       socialLinks: { github: '', linkedin: '', email: '' },
       languages: ['fr', 'en'],
-      sectionOrder: ['hero', 'about', 'skills', 'projects', 'experience', 'contact'],
+      sectionOrder: ['stack', 'projects', 'code', 'skills', 'devops', 'security', 'experience', 'contact'],
     },
   });
   console.log('[seed] Configuration globale prête.');

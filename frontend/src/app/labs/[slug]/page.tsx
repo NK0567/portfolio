@@ -5,8 +5,8 @@ import { ArrowLeft, ExternalLink } from 'lucide-react';
 
 import { getPublic, assetUrl } from '@/lib/server-api';
 import { text, monthYear } from '@/lib/content';
-import SiteHeader from '@/components/public/site-header';
-import SiteFooter from '@/components/public/site-footer';
+import PublicShell from '@/components/public/public-shell';
+import Reveal from '@/components/public/fx/reveal';
 import WriteUp from '@/components/public/write-up';
 import {
   LAB_DIFFICULTY_LABELS,
@@ -71,15 +71,14 @@ export default async function LabPage({ params }: PageProps) {
   const platform = LAB_PLATFORM_LABELS[lab.platform] ?? lab.platform;
 
   return (
-    <>
-      <SiteHeader name={fullName} showLabs />
+    <PublicShell name={fullName} config={config}>
 
       <main>
         <article>
-          <header className="border-b border-rule">
-            <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
+          <header className="border-b border-signal/15">
+            <div className="mx-auto max-w-6xl px-5 pb-12 pt-32 sm:px-8 sm:pb-16 sm:pt-36">
               <Link
-                href="/#labs"
+                href="/#securite"
                 className="inline-flex items-center gap-2 text-sm text-haze transition-colors hover:text-ink"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -96,7 +95,7 @@ export default async function LabPage({ params }: PageProps) {
                   />
                 )}
                 <div className="min-w-0">
-                  <h1 className="text-3xl font-bold tracking-tight text-ink sm:text-5xl">{lab.title}</h1>
+                  <h1 className="font-display text-4xl font-bold tracking-tight text-ink sm:text-6xl">{lab.title}</h1>
                   <p className="mt-4 max-w-[62ch] text-lg leading-relaxed text-graphite">
                     {text(lab.summary)}
                   </p>
@@ -128,25 +127,25 @@ export default async function LabPage({ params }: PageProps) {
             </div>
           </header>
 
-          <div className="mx-auto max-w-5xl px-5 py-14 sm:px-8">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
             <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_230px]">
               <div className="min-w-0 space-y-12">
                 {content && (
-                  <section>
-                    <h2 className="text-xl font-semibold text-ink">Write-up</h2>
+                  <Reveal as="section">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Write-up</h2>
                     <div className="mt-4">
                       <WriteUp source={content} />
                     </div>
-                  </section>
+                  </Reveal>
                 )}
 
                 {remediation && (
-                  <section className="border-l-2 border-signal pl-5">
-                    <h2 className="text-xl font-semibold text-ink">Remédiation</h2>
+                  <Reveal as="section" className="glass border-l-2 !border-l-cyan p-6">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Remédiation</h2>
                     <div className="mt-4">
                       <WriteUp source={remediation} />
                     </div>
-                  </section>
+                  </Reveal>
                 )}
 
                 {/*
@@ -154,7 +153,7 @@ export default async function LabPage({ params }: PageProps) {
                  * contexte, rien ne dit à un lecteur pressé que la cible
                  * était légitime : une ligne lève l'ambiguïté.
                  */}
-                <p className="max-w-[68ch] border-t border-rule pt-6 text-xs leading-relaxed text-haze">
+                <p className="max-w-[68ch] border-t border-signal/15 pt-6 text-xs leading-relaxed text-haze">
                   {lab.platform === 'Custom'
                     ? 'Exercice réalisé sur un environnement de test personnel, isolé et construit à cet effet.'
                     : `Exercice réalisé sur une machine volontairement vulnérable fournie par ${platform}, dans le cadre prévu par la plateforme.`}{' '}
@@ -163,7 +162,7 @@ export default async function LabPage({ params }: PageProps) {
                 </p>
               </div>
 
-              <aside className="space-y-8 lg:border-l lg:border-rule lg:pl-8">
+              <aside className="space-y-8 glass h-fit p-6">
                 {lab.techniques.length > 0 && (
                   <div>
                     <h2 className="font-semibold text-ink">Techniques</h2>
@@ -193,7 +192,7 @@ export default async function LabPage({ params }: PageProps) {
                       href={lab.writeUpUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-2 text-sm text-signal hover:underline"
+                      className="mt-2 inline-flex items-center gap-2 text-sm text-cyan hover:underline"
                     >
                       <ExternalLink className="h-4 w-4" />
                       Scripts et notes
@@ -206,7 +205,6 @@ export default async function LabPage({ params }: PageProps) {
         </article>
       </main>
 
-      <SiteFooter name={fullName} config={config} />
-    </>
+    </PublicShell>
   );
 }

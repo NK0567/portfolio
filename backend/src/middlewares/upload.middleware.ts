@@ -1,34 +1,17 @@
-import path from 'path';
-import fs from 'fs';
-import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { AppError } from '../utils/AppError';
-
-export const UPLOAD_DIR = path.join(__dirname, '../../public/uploads');
-
-// Créé une seule fois au chargement du module, pas à chaque requête.
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
+import { databaseStorage, deleteStoredFile } from '../utils/file-store';
 
 const IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
 const DOC_MIME = ['application/pdf'];
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-  filename: (_req, file, cb) => {
-    /*
-     * Le nom d'origine n'est JAMAIS réutilisé : il peut contenir des
-     * séquences de traversée de répertoire ("../../etc/passwd") ou une
-     * double extension ("photo.php.jpg"). On génère un nom aléatoire et on
-     * ne conserve que l'extension, elle-même filtrée par le fileFilter.
-     */
-    const ext = path.extname(file.originalname).toLowerCase().slice(0, 10);
-    const name = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
-    cb(null, name);
-  },
-});
+/*
+ * Les fichiers vont en base (voir utils/file-store.ts) : un hébergement
+ * gratuit efface le disque à chaque redémarrage. Le nom généré est
+ * aléatoire, celui d'origine n'est jamais réutilisé.
+ */
+const storage = databaseStorage();
 
 const makeFilter =
   (allowed: string[], label: string) =>
@@ -103,20 +86,7 @@ export const mapFilesToBody =
   };
 
 /**
- * Supprime un fichier physique du dossier d'uploads.
- *
- * Sécurisé contre la traversée de répertoire : on vérifie que le chemin
- * résolu reste bien à l'intérieur de UPLOAD_DIR avant toute suppression.
+ * Supprime un fichier envoyé (en base, et sur l'ancien disque s'il y est).
+ * Le nom est contrôlé avant toute opération : aucune traversée possible.
  */
-export const deleteUploadedFile = (publicPath?: string | null): void => {
-  if (!publicPath || !publicPath.startsWith('/uploads/')) return;
-
-  const filename = path.basename(publicPath);
-  const target = path.resolve(UPLOAD_DIR, filename);
-
-  if (!target.startsWith(path.resolve(UPLOAD_DIR))) return;
-
-  fs.promises.unlink(target).catch(() => {
-    /* fichier déjà absent : sans conséquence */
-  });
-};
+export const deleteUploadedFile = (publicPath?: string | null): void => deleteStoredFile(publicPath);

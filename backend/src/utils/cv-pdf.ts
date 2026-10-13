@@ -25,6 +25,41 @@ const MARGIN = 32;
 const MAIN_X = SIDEBAR_W + 28;
 const MAIN_W = PAGE.width - MAIN_X - MARGIN;
 
+
+/**
+ * Libellés fixes du CV dans les deux langues. Le CV anglais imprimait
+ * jusqu'ici des titres français (« Expérience professionnelle »,
+ * « Né le... ») : un recruteur anglophone le voit au premier coup d'œil.
+ */
+const LABELS = {
+  fr: {
+    contact: 'Contact',
+    skills: 'Compétences',
+    languages: 'Langues',
+    interests: "Centres d'intérêt",
+    profile: 'Profil',
+    experience: 'Expérience professionnelle',
+    projects: 'Projets',
+    education: 'Formation',
+    certifications: 'Certifications',
+    born: 'Né le',
+  },
+  en: {
+    contact: 'Contact',
+    skills: 'Skills',
+    languages: 'Languages',
+    interests: 'Interests',
+    profile: 'Profile',
+    experience: 'Work experience',
+    projects: 'Projects',
+    education: 'Education',
+    certifications: 'Certifications',
+    born: 'Born',
+  },
+} as const;
+
+const t = (cv: CvData) => LABELS[cv.lang === 'en' ? 'en' : 'fr'];
+
 const COLORS = {
   sidebarBg: '#12263A',
   sidebarText: '#D6E0EA',
@@ -137,12 +172,12 @@ const drawSidebar = (doc: Doc, cv: CvData, avatar: Buffer | null): void => {
     { icon: 'phone', text: cv.contact.phone },
     { icon: 'phone', text: cv.contact.phoneAlt },
     { icon: 'pin', text: cv.contact.location },
-    { icon: 'calendar', text: cv.contact.birthDate ? `Né le ${cv.contact.birthDate}` : '' },
+    { icon: 'calendar', text: cv.contact.birthDate ? `${t(cv).born} ${cv.contact.birthDate}` : '' },
   ];
   const contactLines = contactCandidates.filter((line) => Boolean(line.text));
 
   if (contactLines.length > 0) {
-    y = drawSidebarSection(doc, 'Contact', y);
+    y = drawSidebarSection(doc, t(cv).contact, y);
 
     const iconSize = 8;
     const textX = MARGIN + iconSize + 6;
@@ -165,7 +200,7 @@ const drawSidebar = (doc: Doc, cv: CvData, avatar: Buffer | null): void => {
 
   /* --- Compétences, groupées par catégorie --- */
   if (cv.skillGroups.length > 0) {
-    y = drawSidebarSection(doc, 'Compétences', y);
+    y = drawSidebarSection(doc, t(cv).skills, y);
 
     for (const group of cv.skillGroups) {
       // Garde-fou : si le bandeau est plein, on cesse d'écrire plutôt que
@@ -191,7 +226,7 @@ const drawSidebar = (doc: Doc, cv: CvData, avatar: Buffer | null): void => {
 
   /* --- Langues --- */
   if (cv.languages.length > 0 && y < PAGE.height - 110) {
-    y = drawSidebarSection(doc, 'Langues', y);
+    y = drawSidebarSection(doc, t(cv).languages, y);
     for (const lang of cv.languages) {
       doc.font('Helvetica-Bold').fontSize(8).fillColor(COLORS.sidebarText).text(lang.name, MARGIN, y, {
         width: innerW,
@@ -205,7 +240,7 @@ const drawSidebar = (doc: Doc, cv: CvData, avatar: Buffer | null): void => {
 
   /* --- Centres d'intérêt --- */
   if (cv.interests.length > 0 && y < PAGE.height - 80) {
-    y = drawSidebarSection(doc, "Centres d'intérêt", y);
+    y = drawSidebarSection(doc, t(cv).interests, y);
     doc
       .font('Helvetica')
       .fontSize(8)
@@ -349,7 +384,7 @@ export const generateCvPdf = async (cv: CvData): Promise<Buffer> => {
   doc.y = 48;
 
   if (cv.profile) {
-    drawMainHeading(doc, 'Profil');
+    drawMainHeading(doc, t(cv).profile);
     doc
       .font('Helvetica')
       .fontSize(8.8)
@@ -359,22 +394,22 @@ export const generateCvPdf = async (cv: CvData): Promise<Buffer> => {
   }
 
   if (cv.experiences.length > 0) {
-    drawMainHeading(doc, 'Expérience professionnelle');
+    drawMainHeading(doc, t(cv).experience);
     cv.experiences.forEach((entry) => drawEntry(doc, entry));
   }
 
   if (cv.projects.length > 0) {
-    drawMainHeading(doc, 'Projets');
+    drawMainHeading(doc, t(cv).projects);
     cv.projects.forEach((entry) => drawEntry(doc, entry));
   }
 
   if (cv.education.length > 0) {
-    drawMainHeading(doc, 'Formation');
+    drawMainHeading(doc, t(cv).education);
     cv.education.forEach((entry) => drawEntry(doc, entry));
   }
 
   if (cv.certifications.length > 0) {
-    drawMainHeading(doc, 'Certifications');
+    drawMainHeading(doc, t(cv).certifications);
     cv.certifications.forEach((entry) => drawEntry(doc, entry));
   }
 

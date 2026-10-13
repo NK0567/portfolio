@@ -23,3 +23,6 @@ backend/public/uploads/*
 # Les modèles de configuration, eux, sont versionnés
 !.env.example
 !**/.env.example
+
+# Archives : jamais versionnées (frontend/tsconfig.zip contient un .env.local)
+*.zip

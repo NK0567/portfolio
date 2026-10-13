@@ -1,30 +1,29 @@
 import type React from 'react';
 import type { Metadata } from 'next';
-import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { getPublic, assetUrl } from '@/lib/server-api';
 import type { GlobalConfig, Profile } from '@/types/api';
 import './globals.css';
 
 /**
- * IBM Plex plutôt qu'Inter ou Poppins.
- *
- * Plex a été dessiné pour la documentation technique et l'ingénierie, et la
- * version monospace appartient à la même famille : les deux se ressemblent
- * sans se confondre. Le mono ne sert pas de décor ici, il sert à ce qui est
- * réellement du code ou de la donnée, noms de technologies et métadonnées.
+ * Trois familles, trois rôles : Space Grotesk pour les titres (géométrique,
+ * technique sans être froid), Inter pour la lecture, JetBrains Mono pour ce
+ * qui est réellement du code ou de la donnée.
  */
-const plexSans = IBM_Plex_Sans({
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+
+const grotesk = Space_Grotesk({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-plex-sans',
+  weight: ['500', '600', '700'],
+  variable: '--font-grotesk',
   display: 'swap',
 });
 
-const plexMono = IBM_Plex_Mono({
+const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
-  variable: '--font-plex-mono',
+  variable: '--font-jetbrains',
   display: 'swap',
 });
 
@@ -48,6 +47,26 @@ const FALLBACK = {
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const safeColor = (value: unknown, fallback: string): string =>
   typeof value === 'string' && HEX.test(value) ? value : fallback;
+
+/**
+ * Luminance relative WCAG d'une couleur #rrggbb, de 0 (noir) à 1 (blanc).
+ *
+ * Le site public est sombre : une couleur choisie trop foncée dans
+ * l'administration (le #0f172a par défaut, par exemple) y deviendrait
+ * invisible. En dessous du seuil, on garde la couleur d'origine du thème.
+ */
+const luminance = (hex: string): number => {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+const visibleOnDark = (value: unknown, fallback: string): string => {
+  const color = safeColor(value, fallback);
+  return luminance(color) >= 0.12 ? color : fallback;
+};
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const [config, profile] = await Promise.all([
@@ -90,8 +109,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const config = await getPublic<GlobalConfig>('/config', { revalidate: 300 });
 
   const theme = config?.themeConfig;
-  const primary = safeColor(theme?.primaryColor, '#12263A');
-  const accent = safeColor(theme?.accentColor, '#0E8A68');
+  const accent = visibleOnDark(theme?.accentColor, '#3b82f6');
+  const secondary = visibleOnDark(theme?.primaryColor, '#22d3ee');
 
   const defaultTheme =
     theme?.defaultMode === 'light' || theme?.defaultMode === 'dark'
@@ -99,26 +118,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       : 'system';
 
   /*
-   * La palette choisie en administration écrase les jetons définis dans
-   * globals.css, en mode clair comme en mode sombre.
-   *
-   * C'est ce qui rend l'écran Site réellement utile : sans cette injection,
-   * on aurait un formulaire de couleurs qui enregistre en base et ne change
-   * rien à l'écran, exactement le genre de fonctionnalité à moitié construite
-   * qu'on essaie d'éliminer de ce projet.
-   *
-   * Seuls `--ink` et `--signal` sont pilotés. Les fonds, les traits et les
-   * gris restent fixes : laisser modifier le fond ouvrirait la porte à des
-   * combinaisons illisibles, texte gris clair sur blanc par exemple, sans
-   * aucun garde-fou de contraste.
+   * Les deux couleurs choisies dans l'écran Site écrasent les néons du site
+   * public : l'accent devient le bleu principal (boutons, liens, lueurs),
+   * la couleur secondaire le cyan des dégradés. Les fonds et les gris
+   * restent fixes, pour qu'aucun réglage ne rende le texte illisible.
    */
-  const paletteCss = `:root{--ink:${primary};--signal:${accent};}.dark{--signal:${accent};}`;
+  const paletteCss = `:root{--signal:${accent};--cyan:${secondary};}`;
 
   return (
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${plexSans.variable} ${plexMono.variable}`}
+      className={`${inter.variable} ${grotesk.variable} ${jetbrains.variable}`}
     >
       <head>
         <style
@@ -128,7 +139,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: paletteCss }}
         />
       </head>
-      <body className="min-h-screen bg-paper font-sans text-graphite antialiased">
+      <body className="min-h-screen font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme={defaultTheme}

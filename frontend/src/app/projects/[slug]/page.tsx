@@ -6,11 +6,10 @@ import { GithubIcon } from '@/components/icons/brand-icons';
 
 import { getPublic, assetUrl } from '@/lib/server-api';
 import { text, list, monthYear } from '@/lib/content';
-import SiteHeader from '@/components/public/site-header';
-import SiteFooter from '@/components/public/site-footer';
+import PublicShell from '@/components/public/public-shell';
+import Reveal from '@/components/public/fx/reveal';
 import {
   PROJECT_STATUS_LABELS,
-  type CyberLab,
   type GlobalConfig,
   type Profile,
   type Project,
@@ -59,11 +58,10 @@ export const generateMetadata = async ({ params }: PageProps): Promise<Metadata>
 export default async function ProjectPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [project, profile, config, labs] = await Promise.all([
+  const [project, profile, config] = await Promise.all([
     getPublic<Project>(`/projects/${slug}`),
     getPublic<Profile>('/profile'),
     getPublic<GlobalConfig>('/config'),
-    getPublic<CyberLab[]>('/labs'),
   ]);
 
   /*
@@ -94,13 +92,12 @@ export default async function ProjectPage({ params }: PageProps) {
     .map(([key, value]) => [key, String(value)] as const);
 
   return (
-    <>
-      <SiteHeader name={fullName} showLabs={(labs?.length ?? 0) > 0} />
+    <PublicShell name={fullName} config={config}>
 
       <main>
         <article>
-          <header className="border-b border-rule">
-            <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
+          <header className="border-b border-signal/15">
+            <div className="mx-auto max-w-6xl px-5 pb-12 pt-32 sm:px-8 sm:pb-16 sm:pt-36">
               <Link
                 href="/#projets"
                 className="inline-flex items-center gap-2 text-sm text-haze transition-colors hover:text-ink"
@@ -109,7 +106,7 @@ export default async function ProjectPage({ params }: PageProps) {
                 Tous les projets
               </Link>
 
-              <h1 className="mt-6 text-3xl font-bold tracking-tight text-ink sm:text-5xl">
+              <h1 className="mt-6 font-display text-4xl font-bold tracking-tight text-ink sm:text-6xl">
                 {project.title}
               </h1>
 
@@ -135,7 +132,7 @@ export default async function ProjectPage({ params }: PageProps) {
                       href={project.demoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition-opacity hover:opacity-90"
+                      className="inline-flex items-center gap-2 btn-primary"
                     >
                       <ExternalLink className="h-4 w-4" />
                       Voir en ligne
@@ -146,7 +143,7 @@ export default async function ProjectPage({ params }: PageProps) {
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-sm border border-rule px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-ink"
+                      className="inline-flex items-center gap-2 btn-ghost"
                     >
                       <GithubIcon className="h-4 w-4" />
                       Code source
@@ -158,64 +155,64 @@ export default async function ProjectPage({ params }: PageProps) {
           </header>
 
           {cover && (
-            <div className="border-b border-rule">
-              <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8">
+            <div className="border-b border-signal/15">
+              <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={cover}
                   alt={project.title}
-                  className="w-full rounded-sm border border-rule object-cover"
+                  className="w-full rounded-2xl border border-signal/20 object-cover shadow-[0_30px_80px_-30px_rgba(59,130,246,0.6)]"
                 />
               </div>
             </div>
           )}
 
-          <div className="mx-auto max-w-5xl px-5 py-14 sm:px-8">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
             <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_230px]">
               <div className="min-w-0 space-y-12">
                 {content && (
-                  <section>
-                    <h2 className="text-xl font-semibold text-ink">Le projet</h2>
+                  <Reveal as="section">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Le projet</h2>
                     <div className="mt-4 max-w-[68ch] space-y-4 leading-relaxed text-graphite">
                       {content.split(/\n{2,}/).map((paragraph, index) => (
                         <p key={index}>{paragraph}</p>
                       ))}
                     </div>
-                  </section>
+                  </Reveal>
                 )}
 
                 {features.length > 0 && (
-                  <section>
-                    <h2 className="text-xl font-semibold text-ink">Fonctionnalités</h2>
+                  <Reveal as="section">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Fonctionnalités</h2>
                     <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
                       {features.map((feature, index) => (
                         <li key={index} className="flex gap-2.5">
                           <span
                             aria-hidden
-                            className="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal"
+                            className="mt-2 h-1 w-1 shrink-0 rounded-full bg-cyan"
                           />
                           <span className="text-sm leading-relaxed text-graphite">{feature}</span>
                         </li>
                       ))}
                     </ul>
-                  </section>
+                  </Reveal>
                 )}
 
                 {challenges && (
-                  <section>
-                    <h2 className="text-xl font-semibold text-ink">Difficultés et solutions</h2>
+                  <Reveal as="section">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Difficultés et solutions</h2>
                     <div className="mt-4 max-w-[68ch] space-y-4 leading-relaxed text-graphite">
                       {challenges.split(/\n{2,}/).map((paragraph, index) => (
                         <p key={index}>{paragraph}</p>
                       ))}
                     </div>
-                  </section>
+                  </Reveal>
                 )}
 
                 {architecture.length > 0 && (
-                  <section>
-                    <h2 className="text-xl font-semibold text-ink">Architecture</h2>
-                    <dl className="mt-4 divide-y divide-rule border-y border-rule">
+                  <Reveal as="section">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Architecture</h2>
+                    <dl className="mt-4 glass divide-y divide-signal/10 px-5">
                       {architecture.map(([key, value]) => (
                         <div
                           key={key}
@@ -226,12 +223,12 @@ export default async function ProjectPage({ params }: PageProps) {
                         </div>
                       ))}
                     </dl>
-                  </section>
+                  </Reveal>
                 )}
 
                 {gallery.length > 0 && (
-                  <section>
-                    <h2 className="text-xl font-semibold text-ink">Captures</h2>
+                  <Reveal as="section">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Captures</h2>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       {gallery.map((image, index) => (
                         /* eslint-disable-next-line @next/next/no-img-element */
@@ -240,36 +237,36 @@ export default async function ProjectPage({ params }: PageProps) {
                           src={image}
                           alt={`${project.title}, capture ${index + 1}`}
                           loading="lazy"
-                          className="w-full rounded-sm border border-rule object-cover"
+                          className="w-full rounded-xl border border-signal/20 object-cover"
                         />
                       ))}
                     </div>
-                  </section>
+                  </Reveal>
                 )}
 
                 {project.videoUrl && (
-                  <section>
-                    <h2 className="text-xl font-semibold text-ink">Démonstration</h2>
+                  <Reveal as="section">
+                    <h2 className="font-display text-2xl font-semibold text-ink">Démonstration</h2>
                     <a
                       href={project.videoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-2 text-sm text-signal hover:underline"
+                      className="mt-3 inline-flex items-center gap-2 text-sm text-cyan hover:underline"
                     >
                       <ExternalLink className="h-4 w-4" />
                       Voir la vidéo
                     </a>
-                  </section>
+                  </Reveal>
                 )}
               </div>
 
-              <aside className="space-y-8 lg:border-l lg:border-rule lg:pl-8">
+              <aside className="space-y-8 glass h-fit p-6">
                 {(project.skills?.length ?? 0) > 0 && (
                   <div>
                     <h2 className="font-semibold text-ink">Technologies</h2>
-                    <ul className="mt-3 space-y-1.5">
+                    <ul className="mt-3 flex flex-wrap gap-2">
                       {project.skills.map((skill) => (
-                        <li key={skill.id} className="font-mono text-sm text-graphite">
+                        <li key={skill.id} className="chip">
                           {skill.name}
                         </li>
                       ))}
@@ -296,8 +293,7 @@ export default async function ProjectPage({ params }: PageProps) {
         </article>
       </main>
 
-      <SiteFooter name={fullName} config={config} />
-    </>
+    </PublicShell>
   );
 }
 

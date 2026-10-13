@@ -12,9 +12,11 @@ export interface ProfileFormInput {
   headline?: { fr: string; en: string };
   bio?: { fr: string; en: string };
   titles?: { fr: string[]; en: string[] };
-  languages?: Array<{ name: string; level: string }>;
+  languages?: Array<{ name: string; level: string; nameEn?: string; levelEn?: string }>;
   interests?: { fr: string[]; en: string[] };
   avatar?: File | null;
+  /** null retire la photo. */
+  avatarUrl?: string | null;
 }
 
 export const profileService = {

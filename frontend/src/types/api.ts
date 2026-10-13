@@ -137,7 +137,7 @@ export interface Profile {
   location: string | null;
   birthDate: string | null;
   headline: I18nText | null;
-  languages: Array<{ name: string; level: string }> | null;
+  languages: Array<{ name: string; level: string; nameEn?: string; levelEn?: string }> | null;
   interests: I18nList | null;
 }
 

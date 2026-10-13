@@ -1,0 +1,32 @@
+# Blueprint Render : crée l'API en un clic (plan gratuit).
+# Render > New > Blueprint > choisir ce dépôt. Voir DEPLOIEMENT-GRATUIT.md.
+services:
+  - type: web
+    name: portfolio-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      # Deux secrets aléatoires distincts, générés par Render.
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      # À renseigner dans le tableau de bord Render (jamais dans le dépôt).
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_USERNAME
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false

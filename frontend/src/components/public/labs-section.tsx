@@ -1,67 +1,58 @@
 import Link from 'next/link';
+import { ArrowUpRight, Flag } from 'lucide-react';
+import Reveal from './fx/reveal';
 import { text, monthYear } from '@/lib/content';
-import {
-  LAB_DIFFICULTY_LABELS,
-  LAB_PLATFORM_LABELS,
-  type CyberLab,
-} from '@/types/api';
+import { LAB_DIFFICULTY_LABELS, LAB_PLATFORM_LABELS, type CyberLab } from '@/types/api';
 
 interface Props {
   labs: CyberLab[];
 }
 
+const DIFFICULTY_TONE: Record<string, string> = {
+  Easy: 'text-success border-success/30 bg-success/10',
+  Medium: 'text-amber-300 border-amber-300/30 bg-amber-300/10',
+  Hard: 'text-orange-400 border-orange-400/30 bg-orange-400/10',
+  Insane: 'text-red-400 border-red-400/30 bg-red-400/10',
+};
+
 /**
- * Labs de sécurité publiés.
- *
- * Composant serveur : aucune interaction, donc aucun JavaScript envoyé au
- * navigateur. Une liste plutôt que des cartes à image : un lab n'a pas de
- * capture d'écran qui parle, ce qui compte c'est la faille et la méthode,
- * et une liste dense se lit plus vite qu'une grille de vignettes.
+ * Labs de sécurité publiés, en cartes. Chacune mène au write-up complet
+ * hébergé sur le site.
  */
 export default function LabsSection({ labs }: Props) {
   return (
-    <ul className="divide-y divide-rule border-y border-rule">
-      {labs.map((lab) => (
-        <li key={lab.id}>
-          <Link
-            href={`/labs/${lab.slug}`}
-            className="group grid gap-2 py-5 sm:grid-cols-[minmax(0,1fr)_200px] sm:gap-8"
-          >
-            <div className="min-w-0">
-              <h3 className="font-semibold text-ink group-hover:text-signal">{lab.title}</h3>
-              <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-haze">
-                {text(lab.summary)}
-              </p>
-              {lab.techniques.length > 0 && (
-                <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
-                  {lab.techniques.slice(0, 4).map((technique) => (
-                    <span key={technique} className="font-mono text-xs text-graphite">
-                      {technique}
-                    </span>
-                  ))}
-                </p>
-              )}
+    <ul className="grid gap-4 sm:grid-cols-2">
+      {labs.map((lab, index) => (
+        <Reveal as="li" key={lab.id} delay={index * 0.06}>
+          <Link href={`/labs/${lab.slug}`} className="glass glass-hover group flex h-full flex-col p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="neon-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-cyan">
+                  <Flag className="h-4 w-4" />
+                </span>
+                <div>
+                  <h3 className="font-display font-semibold text-ink group-hover:text-cyan">{lab.title}</h3>
+                  <p className="text-xs text-haze">
+                    {LAB_PLATFORM_LABELS[lab.platform] ?? lab.platform} · {monthYear(lab.completedAt)}
+                  </p>
+                </div>
+              </div>
+              <ArrowUpRight className="h-4 w-4 shrink-0 text-haze transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-cyan" />
             </div>
 
-            <dl className="flex gap-6 text-sm sm:flex-col sm:gap-1 sm:text-right">
-              <div>
-                <dt className="sr-only">Plateforme</dt>
-                <dd className="text-graphite">{LAB_PLATFORM_LABELS[lab.platform] ?? lab.platform}</dd>
-              </div>
-              <div>
-                <dt className="sr-only">Difficulté</dt>
-                <dd className="font-mono text-xs text-haze">
-                  {LAB_DIFFICULTY_LABELS[lab.difficulty] ?? lab.difficulty}
-                  {lab.category ? ` · ${lab.category}` : ''}
-                </dd>
-              </div>
-              <div>
-                <dt className="sr-only">Résolu</dt>
-                <dd className="font-mono text-xs text-haze">{monthYear(lab.completedAt)}</dd>
-              </div>
-            </dl>
+            <p className="mt-4 line-clamp-3 flex-1 text-sm leading-relaxed text-haze">{text(lab.summary)}</p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] ${DIFFICULTY_TONE[lab.difficulty] ?? ''}`}>
+                {LAB_DIFFICULTY_LABELS[lab.difficulty] ?? lab.difficulty}
+              </span>
+              {lab.category && <span className="chip">{lab.category}</span>}
+              {lab.techniques.slice(0, 2).map((t) => (
+                <span key={t} className="chip">{t}</span>
+              ))}
+            </div>
           </Link>
-        </li>
+        </Reveal>
       ))}
     </ul>
   );

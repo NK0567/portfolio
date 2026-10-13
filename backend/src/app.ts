@@ -1,4 +1,3 @@
-import path from 'path';
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -7,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import { env, isProd, corsOrigins } from './config/env';
 import { globalLimiter } from './middlewares/rateLimit.middleware';
 import { notFound, errorHandler } from './middlewares/error.middleware';
+import { serveStoredFile, LEGACY_UPLOAD_DIR } from './utils/file-store';
+import prisma from './config/db';
 
 import authRoutes from './routes/auth.routes';
 import projectRoutes from './routes/project.routes';
@@ -29,10 +30,12 @@ const app: Application = express();
  * Derrière un reverse proxy (Nginx, Railway, Render...), l'IP vue par Express
  * est celle du proxy. Sans ce réglage, le limiteur de débit compterait tous
  * les visiteurs comme un seul client et bloquerait tout le monde d'un coup.
- * On met 1 (et non `true`) : `true` fait confiance à n'importe quel
- * X-Forwarded-For, ce qui permettrait de contourner le rate limiting.
+ * Un nombre de proxies (et non `true`) : `true` fait confiance à n'importe
+ * quel X-Forwarded-For, ce qui permettrait de contourner le rate limiting.
+ * 1 convient à Render, Koyeb ou Nginx. Plus haut, un visiteur qui appelle
+ * l'API en direct pourrait choisir son adresse et contourner les limites.
  */
-app.set('trust proxy', 1);
+app.set('trust proxy', env.TRUST_PROXY);
 app.disable('x-powered-by');
 
 /* ---------------- Sécurité ---------------- */
@@ -60,10 +63,14 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
-/* ---------------- Fichiers statiques ---------------- */
+/* ---------------- Fichiers envoyés ----------------
+ * D'abord la base (stockage actuel), puis l'ancien dossier sur disque pour
+ * les fichiers déposés avant la migration.
+ */
+app.get('/uploads/:filename', serveStoredFile);
 app.use(
   '/uploads',
-  express.static(path.join(__dirname, '../public/uploads'), {
+  express.static(LEGACY_UPLOAD_DIR, {
     maxAge: isProd ? '30d' : 0,
     // Les noms de fichiers étant aléatoires, on ne veut pas exposer
     // la liste du répertoire.
@@ -73,9 +80,23 @@ app.use(
 );
 
 /* ---------------- Santé ---------------- */
-app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'OK',
+/*
+ * Interrogé toutes les 10 minutes par un service de surveillance gratuit :
+ * l'hébergeur ne met pas l'API en veille, et la requête SELECT 1 garde la
+ * base active elle aussi. Une base injoignable renvoie 503, ce qui déclenche
+ * l'alerte du service de surveillance.
+ */
+app.get('/health', async (_req: Request, res: Response) => {
+  let database = 'OK';
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch {
+    database = 'DOWN';
+  }
+
+  res.status(database === 'OK' ? 200 : 503).json({
+    status: database === 'OK' ? 'OK' : 'DEGRADED',
+    database,
     env: env.NODE_ENV,
     uptime: Math.round(process.uptime()),
     timestamp: new Date().toISOString(),

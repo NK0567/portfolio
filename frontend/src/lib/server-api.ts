@@ -16,7 +16,11 @@ import 'server-only';
 
 const BASE =
   process.env.API_INTERNAL_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
+  // En ligne, NEXT_PUBLIC_API_URL vaut « /backend/api » : un chemin relatif
+  // que le navigateur comprend, mais pas le serveur. On repart alors de
+  // l'origine réelle de l'API.
+  (process.env.BACKEND_ORIGIN ? `${process.env.BACKEND_ORIGIN.replace(/\/+$/, '')}/api` : undefined) ??
+  (process.env.NEXT_PUBLIC_API_URL?.startsWith('http') ? process.env.NEXT_PUBLIC_API_URL : undefined) ??
   'http://127.0.0.1:8080/api';
 
 /** Origine du backend, pour résoudre les fichiers servis depuis /uploads. */

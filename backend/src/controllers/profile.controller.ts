@@ -41,7 +41,8 @@ export const upsertProfile = async (req: Request, res: Response): Promise<void> 
     profile = await prisma.profile.update({ where: { id: existing.id }, data });
 
     // Les anciens fichiers remplacés sont supprimés du disque.
-    if (data.avatarUrl && data.avatarUrl !== existing.avatarUrl) {
+    // Photo remplacée ou retirée (avatarUrl: null) : l'ancien fichier est supprimé.
+    if (data.avatarUrl !== undefined && data.avatarUrl !== existing.avatarUrl) {
       deleteUploadedFile(existing.avatarUrl);
     }
     if (data.cvUrlFr && data.cvUrlFr !== existing.cvUrlFr) {
@@ -56,13 +57,16 @@ export const upsertProfile = async (req: Request, res: Response): Promise<void> 
         'Le prénom et le nom sont obligatoires lors de la première configuration.'
       );
     }
+    /*
+     * Tous les champs reçus sont enregistrés dès la création. La version
+     * précédente n'en gardait que sept : coordonnées, titre, langues et
+     * centres d'intérêt disparaissaient au premier enregistrement.
+     */
     profile = await prisma.profile.create({
       data: {
+        ...data,
         firstName: data.firstName,
         lastName: data.lastName,
-        avatarUrl: data.avatarUrl ?? null,
-        cvUrlFr: data.cvUrlFr ?? null,
-        cvUrlEn: data.cvUrlEn ?? null,
         bio: data.bio ?? { fr: '', en: '' },
         titles: data.titles ?? { fr: [], en: [] },
       },

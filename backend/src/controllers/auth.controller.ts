@@ -11,6 +11,14 @@ const REFRESH_COOKIE = 'refreshToken';
 const BCRYPT_ROUNDS = 12;
 
 /**
+ * Vrai hash bcrypt (60 caractères) d'un secret aléatoire, calculé une fois au
+ * démarrage. Le précédent hash factice faisait 67 caractères : bcryptjs le
+ * rejetait instantanément sans rien calculer, si bien qu'un email inconnu
+ * répondait bien plus vite qu'un email existant et trahissait les comptes.
+ */
+const DUMMY_HASH = bcrypt.hashSync(`dummy-${Date.now()}-${Math.random()}`, BCRYPT_ROUNDS);
+
+/**
  * Options du cookie portant le refresh token.
  *
  * `sameSite: 'lax'` en développement (frontend et backend sur localhost,
@@ -108,8 +116,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
    * hash factice. Sans cela, une réponse instantanée trahirait l'absence du
    * compte, et un attaquant pourrait énumérer les emails valides au chrono.
    */
-  const hashToCompare =
-    user?.passwordHash ?? '$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinva';
+  const hashToCompare = user?.passwordHash ?? DUMMY_HASH;
   const isMatch = await bcrypt.compare(password, hashToCompare);
 
   if (!user || !isMatch) {

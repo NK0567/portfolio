@@ -10,7 +10,8 @@ const titlesShape = z.object({
 const profileShape = {
   firstName: z.string().min(1, 'Le prénom est obligatoire.').max(60).trim(),
   lastName: z.string().min(1, 'Le nom est obligatoire.').max(60).trim(),
-  avatarUrl: imagePath.optional(),
+  // null : retire la photo (le CV affiche alors les initiales).
+  avatarUrl: imagePath.nullable().optional(),
   cvUrlFr: imagePath.optional(),
   cvUrlEn: imagePath.optional(),
   bio: jsonField(i18nTextOptional),
@@ -25,9 +26,20 @@ const profileShape = {
   birthDate: z.coerce.date().nullable().optional(),
   /** Libellé sous le nom sur le CV : { fr: "Développeur Full-Stack", en: "..." } */
   headline: jsonField(i18nTextOptional),
-  /** [{ name: "Français", level: "courant" }] */
+  /**
+   * [{ name: "Français", level: "courant", nameEn: "French", levelEn: "native" }]
+   * Les versions anglaises sont facultatives : à défaut, le CV anglais
+   * reprend le français.
+   */
   languages: jsonField(
-    z.array(z.object({ name: z.string().min(1), level: z.string().min(1) }))
+    z.array(
+      z.object({
+        name: z.string().min(1).max(60),
+        level: z.string().min(1).max(60),
+        nameEn: z.string().max(60).optional(),
+        levelEn: z.string().max(60).optional(),
+      })
+    )
   ),
   /** Centres d'intérêt : { fr: [...], en: [...] } */
   interests: jsonField(titlesShape),

@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import { HOME_SECTIONS, resolveSectionOrder } from '@/lib/sections';
 
 /**
  * Configuration globale du site.
@@ -69,8 +70,8 @@ export const DEFAULT_CONFIG: Omit<GlobalConfig, 'id'> = {
   isAvailable: true,
   freelanceStatus: 'Disponible',
   themeConfig: {
-    primaryColor: '#12263A',
-    accentColor: '#0E8A68',
+    primaryColor: '#22d3ee',
+    accentColor: '#3b82f6',
     defaultMode: 'system',
     fontHeading: 'IBM Plex Sans',
     fontBody: 'IBM Plex Sans',
@@ -83,7 +84,7 @@ export const DEFAULT_CONFIG: Omit<GlobalConfig, 'id'> = {
   },
   socialLinks: {},
   languages: ['fr', 'en'],
-  sectionOrder: ['hero', 'projects', 'skills', 'experience', 'contact'],
+  sectionOrder: [...HOME_SECTIONS],
 };
 
 export const configService = {
@@ -119,9 +120,9 @@ export const configService = {
       socialLinks:
         config.socialLinks && typeof config.socialLinks === 'object' ? config.socialLinks : {},
       languages: Array.isArray(config.languages) ? config.languages : DEFAULT_CONFIG.languages,
-      sectionOrder: Array.isArray(config.sectionOrder)
-        ? config.sectionOrder
-        : DEFAULT_CONFIG.sectionOrder,
+      // Toujours la liste complète des sections actuelles, dans l'ordre
+      // enregistré : une section ajoutée depuis apparaît à sa place logique.
+      sectionOrder: resolveSectionOrder(config.sectionOrder),
       updatedAt: config.updatedAt,
     };
   },

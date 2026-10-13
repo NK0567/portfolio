@@ -21,6 +21,7 @@ import {
   type ThemeMode,
 } from '@/services/config.service';
 import { getErrorMessage } from '@/lib/api';
+import { HOME_SECTION_LABELS } from '@/lib/sections';
 
 /**
  * Configuration du site public.
@@ -51,16 +52,8 @@ const KNOWN_NETWORKS = [
   'facebook',
 ];
 
-/** Sections de la page d'accueil, dans l'ordre où elles peuvent apparaître. */
-const SECTION_LABELS: Record<string, string> = {
-  hero: 'En-tête',
-  about: 'À propos',
-  projects: 'Projets',
-  skills: 'Compétences',
-  experience: 'Parcours',
-  education: 'Formation',
-  contact: 'Contact',
-};
+/** Libellés des sections déplaçables, partagés avec la page d'accueil. */
+const SECTION_LABELS: Record<string, string> = HOME_SECTION_LABELS;
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
@@ -485,14 +478,14 @@ export default function SiteConfigPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="primaryColor" className={label}>
-                Couleur principale
+                Couleur secondaire (néon)
               </label>
               <div className="flex gap-2">
                 <input
                   type="color"
                   aria-label="Sélecteur de couleur principale"
                   className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-transparent dark:border-slate-700"
-                  value={HEX.test(config.themeConfig.primaryColor) ? config.themeConfig.primaryColor : '#12263A'}
+                  value={HEX.test(config.themeConfig.primaryColor) ? config.themeConfig.primaryColor : '#22d3ee'}
                   onChange={(e) => patchTheme({ primaryColor: e.target.value })}
                 />
                 <input
@@ -502,19 +495,19 @@ export default function SiteConfigPage() {
                   onChange={(e) => patchTheme({ primaryColor: e.target.value })}
                 />
               </div>
-              <p className={hint}>Texte et titres. Doit rester très sombre.</p>
+              <p className={hint}>Deuxième ton des dégradés et des lueurs. Choisis une couleur vive : trop sombre, elle serait invisible sur le fond nuit et le site garde alors le cyan d&apos;origine.</p>
             </div>
 
             <div>
               <label htmlFor="accentColor" className={label}>
-                Couleur d&apos;accent
+                Couleur principale (néon)
               </label>
               <div className="flex gap-2">
                 <input
                   type="color"
                   aria-label="Sélecteur de couleur d'accent"
                   className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-transparent dark:border-slate-700"
-                  value={HEX.test(config.themeConfig.accentColor) ? config.themeConfig.accentColor : '#0E8A68'}
+                  value={HEX.test(config.themeConfig.accentColor) ? config.themeConfig.accentColor : '#3b82f6'}
                   onChange={(e) => patchTheme({ accentColor: e.target.value })}
                 />
                 <input
@@ -525,7 +518,7 @@ export default function SiteConfigPage() {
                 />
               </div>
               <p className={hint}>
-                Liens et badges. Évite les tons clairs : ils deviennent illisibles sur fond blanc.
+                Boutons, liens, lueurs et scènes du site public. Même règle : trop sombre, elle est ignorée.
               </p>
             </div>
 
@@ -544,25 +537,31 @@ export default function SiteConfigPage() {
                 <option value="dark">Sombre</option>
               </select>
               <p className={hint}>
-                « Suivre le réglage » est le choix le plus sûr : le visiteur garde la main.
+                S&apos;applique à l&apos;administration. Le site public est toujours en mode nuit : ses scènes 3D sont conçues pour.
               </p>
             </div>
 
             <div className="flex items-end">
-              <div className="w-full rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-                <p className="mb-2 text-xs text-slate-400">Aperçu</p>
+              <div className="w-full rounded-lg border border-slate-700 bg-[#050a18] p-3">
+                <p className="mb-2 text-xs text-slate-400">Aperçu sur le fond du site</p>
                 <div className="flex items-center gap-3">
                   <span
-                    className="rounded px-2 py-1 text-xs font-medium text-white"
-                    style={{ backgroundColor: config.themeConfig.primaryColor }}
+                    className="rounded-full px-3 py-1 text-xs font-semibold text-white"
+                    style={{
+                      background: `linear-gradient(100deg, ${config.themeConfig.accentColor}, #8b5cf6)`,
+                    }}
                   >
-                    Titre
+                    Bouton
                   </span>
                   <span
-                    className="text-sm font-medium"
-                    style={{ color: config.themeConfig.accentColor }}
+                    className="text-sm font-semibold"
+                    style={{
+                      backgroundImage: `linear-gradient(100deg, ${config.themeConfig.primaryColor}, ${config.themeConfig.accentColor})`,
+                      WebkitBackgroundClip: 'text',
+                      color: 'transparent',
+                    }}
                   >
-                    Un lien
+                    Titre en dégradé
                   </span>
                 </div>
               </div>
@@ -640,8 +639,8 @@ export default function SiteConfigPage() {
                 ))}
               </ul>
               <p className={hint}>
-                Enregistré en base, mais pas encore lu par la page d&apos;accueil, qui garde un
-                ordre fixe. Je préfère te le dire plutôt que te laisser croire que ça agit.
+                Appliqué à la page d&apos;accueil, sous l&apos;en-tête qui reste toujours en premier.
+                Visible sur le site environ une minute après l&apos;enregistrement.
               </p>
             </div>
           </div>

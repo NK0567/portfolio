@@ -4,7 +4,7 @@ import { jsonField, i18nText, i18nList, imagePath } from './common.schema';
 export const createExperienceSchema = z
   .object({
     company: z.string().min(1, "Le nom de l'entreprise est obligatoire.").max(120).trim(),
-    logoUrl: imagePath.optional(),
+    logoUrl: imagePath.nullable().optional(),
     location: z.string().min(1, 'La localisation est obligatoire.').max(120).trim(),
     role: jsonField(i18nText),
     description: jsonField(i18nText),
@@ -31,7 +31,7 @@ export const createExperienceSchema = z
  */
 const baseExperience = z.object({
   company: z.string().min(1).max(120).trim(),
-  logoUrl: imagePath.optional(),
+  logoUrl: imagePath.nullable().optional(),
   location: z.string().min(1).max(120).trim(),
   role: jsonField(i18nText),
   description: jsonField(i18nText),

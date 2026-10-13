@@ -328,3 +328,17 @@ model CoverLetter {
 
   @@index([isArchived, updatedAt])
 }
+/// Fichiers envoyés depuis l'administration (images, CV en PDF).
+///
+/// Stockés en base plutôt que sur le disque : les hébergeurs gratuits
+/// (Render, Koyeb...) effacent le disque à chaque redémarrage, et toutes
+/// les images du site disparaîtraient au premier redéploiement. En base,
+/// elles suivent les sauvegardes et survivent à tout. L'adresse publique
+/// reste /uploads/<filename>, inchangée pour le reste de l'application.
+model StoredFile {
+  filename  String   @id @db.VarChar(80)
+  mimeType  String   @db.VarChar(80)
+  size      Int
+  data      Bytes    @db.MediumBlob
+  createdAt DateTime @default(now())
+}

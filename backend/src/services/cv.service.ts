@@ -17,14 +17,16 @@ const pick = (value: unknown, lang: Lang): string => {
   if (!value) return '';
   if (typeof value === 'string') return value;
   const obj = value as Record<string, unknown>;
-  return String(obj[lang] ?? obj.fr ?? obj.en ?? '');
+  const filled = (v: unknown) => (typeof v === 'string' && v.trim() ? v : undefined);
+  return String(filled(obj[lang]) ?? filled(obj.fr) ?? filled(obj.en) ?? '');
 };
 
 const pickList = (value: unknown, lang: Lang): string[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value.map(String);
   const obj = value as Record<string, unknown>;
-  const list = obj[lang] ?? obj.fr ?? obj.en;
+  const filled = (v: unknown) => (Array.isArray(v) && v.length > 0 ? v : undefined);
+  const list = filled(obj[lang]) ?? filled(obj.fr) ?? filled(obj.en);
   return Array.isArray(list) ? list.map(String) : [];
 };
 
@@ -118,18 +120,18 @@ export const buildCvData = async (lang: Lang = 'fr'): Promise<CvData> => {
   const [profile, skills, experiences, projects, education, certifications] = await Promise.all([
     prisma.profile.findFirst(),
     prisma.skill.findMany({ orderBy: [{ category: 'asc' }, { order: 'asc' }, { level: 'desc' }] }),
-    prisma.experience.findMany({ orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }] }),
+    prisma.experience.findMany({ orderBy: [{ order: 'asc' }, { isCurrent: 'desc' }, { startDate: 'desc' }] }),
     prisma.project.findMany({
       orderBy: [{ order: 'asc' }, { date: 'desc' }],
       include: { skills: { include: { skill: { select: { name: true } } } } },
     }),
-    prisma.education.findMany({ orderBy: [{ startDate: 'desc' }] }),
-    prisma.certification.findMany({ orderBy: [{ issueDate: 'desc' }] }),
+    prisma.education.findMany({ orderBy: [{ order: 'asc' }, { startDate: 'desc' }] }),
+    prisma.certification.findMany({ orderBy: [{ order: 'asc' }, { issueDate: 'desc' }] }),
   ]);
 
   const fullName = profile
     ? `${profile.lastName.toUpperCase()} ${profile.firstName}`.trim()
-    : 'Profil non configuré';
+    : lang === 'en' ? 'Profile not set up' : 'Profil non configuré';
 
   /* ---- Compétences regroupées par catégorie ---- */
   const grouped = new Map<string, string[]>();
@@ -188,9 +190,13 @@ export const buildCvData = async (lang: Lang = 'fr'): Promise<CvData> => {
     tech: [],
   }));
 
-  const languages = Array.isArray(profile?.languages)
-    ? (profile.languages as Array<{ name: string; level: string }>)
-    : [];
+  type StoredLanguage = { name: string; level: string; nameEn?: string; levelEn?: string };
+  const languages = (Array.isArray(profile?.languages) ? (profile.languages as StoredLanguage[]) : []).map(
+    (l) =>
+      lang === 'en'
+        ? { name: l.nameEn?.trim() || l.name, level: l.levelEn?.trim() || l.level }
+        : { name: l.name, level: l.level }
+  );
 
   return {
     lang,

@@ -1,3 +1,9 @@
+"use client";
+
+import { useRef } from 'react';
+import { motion, useScroll, useSpring } from 'framer-motion';
+import { Briefcase, GraduationCap } from 'lucide-react';
+import Reveal from './fx/reveal';
 import { text, list, period } from '@/lib/content';
 import type { Education, Experience } from '@/types/api';
 
@@ -5,19 +11,6 @@ interface Props {
   experiences: Experience[];
   education: Education[];
 }
-
-/**
- * Parcours professionnel et formation, dans une seule frise.
- *
- * Deux sections séparées obligent le lecteur à reconstruire mentalement la
- * chronologie. Une seule frise, triée par date, montre d'un coup d'œil ce qui
- * s'est passé en parallèle : un diplôme préparé pendant un emploi, par
- * exemple, se lit immédiatement.
- *
- * C'est l'un des rares endroits où un marqueur numéroté serait tentant. Il ne
- * serait pas juste : ce n'est pas une procédure en étapes, c'est une suite de
- * dates. Les dates font donc elles-mêmes le repère.
- */
 
 type Entry = {
   id: string;
@@ -30,7 +23,16 @@ type Entry = {
   bullets: string[];
 };
 
+/**
+ * Parcours : expériences et formation sur une même ligne du temps, la plus
+ * récente en haut. La ligne s'allume au fil de la lecture, et les entrées
+ * alternent de part et d'autre sur grand écran.
+ */
 export default function TimelineSection({ experiences, education }: Props) {
+  const ref = useRef<HTMLOListElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 75%', 'end 60%'] });
+  const scaleY = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
+
   const entries: Entry[] = [
     ...experiences.map((exp) => ({
       id: exp.id,
@@ -59,42 +61,53 @@ export default function TimelineSection({ experiences, education }: Props) {
   }
 
   return (
-    <ol className="relative space-y-10 border-l border-rule pl-6 sm:pl-8">
-      {entries.map((entry) => (
-        <li key={`${entry.kind}-${entry.id}`} className="relative">
-          <span
-            aria-hidden
-            className={[
-              'absolute -left-[1.68rem] top-2 h-2.5 w-2.5 rounded-full border-2 sm:-left-[2.18rem]',
-              entry.kind === 'experience'
-                ? 'border-signal bg-signal'
-                : 'border-haze bg-paper',
-            ].join(' ')}
-          />
+    <ol ref={ref} className="relative space-y-10">
+      {/* Rail et sa partie allumée */}
+      <div aria-hidden className="absolute bottom-0 left-5 top-0 w-px bg-rule md:left-1/2" />
+      <motion.div
+        aria-hidden
+        style={{ scaleY }}
+        className="absolute bottom-0 left-5 top-0 w-px origin-top bg-gradient-to-b from-cyan via-signal to-violet shadow-[0_0_10px_var(--cyan)] md:left-1/2"
+      />
 
-          <p className="font-mono text-xs text-haze">{entry.period}</p>
+      {entries.map((entry, index) => {
+        const Icon = entry.kind === 'experience' ? Briefcase : GraduationCap;
+        const right = index % 2 === 1;
 
-          <h3 className="mt-1 font-semibold text-ink">{entry.title}</h3>
-          <p className="text-sm text-graphite">{entry.place}</p>
+        return (
+          <li key={`${entry.kind}-${entry.id}`} className="relative grid md:grid-cols-2 md:gap-14">
+            <span className="neon-ring absolute left-5 top-5 z-10 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full text-cyan md:left-1/2">
+              <Icon className="h-4 w-4" />
+            </span>
 
-          {entry.description && (
-            <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-haze">
-              {entry.description}
-            </p>
-          )}
+            <Reveal
+              direction={right ? 'left' : 'right'}
+              className={`pl-14 md:pl-0 ${right ? 'md:col-start-2' : 'md:col-start-1 md:text-right'}`}
+            >
+              <div className="glass glass-hover p-5 text-left">
+                <p className="font-mono text-xs text-cyan">{entry.period}</p>
+                <h3 className="mt-1.5 font-display text-lg font-semibold text-ink">{entry.title}</h3>
+                <p className="text-sm text-graphite">{entry.place}</p>
 
-          {entry.bullets.length > 0 && (
-            <ul className="mt-3 space-y-1.5">
-              {entry.bullets.map((bullet, index) => (
-                <li key={index} className="flex max-w-[62ch] gap-2">
-                  <span aria-hidden className="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal" />
-                  <span className="text-sm leading-relaxed text-haze">{bullet}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      ))}
+                {entry.description && (
+                  <p className="mt-3 text-sm leading-relaxed text-haze">{entry.description}</p>
+                )}
+
+                {entry.bullets.length > 0 && (
+                  <ul className="mt-3 space-y-1.5">
+                    {entry.bullets.map((bullet, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span aria-hidden className="mt-2 h-1 w-1 shrink-0 rounded-full bg-cyan" />
+                        <span className="text-sm leading-relaxed text-haze">{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </Reveal>
+          </li>
+        );
+      })}
     </ol>
   );
 }

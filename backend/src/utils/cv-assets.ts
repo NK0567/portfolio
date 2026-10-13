@@ -1,6 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import { UPLOAD_DIR } from '../middlewares/upload.middleware';
+import { readStoredFile } from './file-store';
 
 /**
  * Chargement de la photo de profil pour le PDF.
@@ -32,13 +30,10 @@ export const loadAvatar = async (avatarUrl: string | null): Promise<Buffer | nul
     let buffer: Buffer;
 
     if (avatarUrl.startsWith('/uploads/')) {
-      // Fichier local : on résout puis on vérifie qu'on reste bien dans le
-      // dossier d'uploads (protection contre la traversée de répertoire).
-      const filename = path.basename(avatarUrl);
-      const target = path.resolve(UPLOAD_DIR, filename);
-      if (!target.startsWith(path.resolve(UPLOAD_DIR))) return null;
-
-      buffer = await fs.promises.readFile(target);
+      // Fichier envoyé depuis l'administration : en base, ou sur l'ancien disque.
+      const stored = await readStoredFile(avatarUrl);
+      if (!stored) return null;
+      buffer = stored.data;
     } else if (/^https?:\/\//.test(avatarUrl)) {
       // Image distante : délai court, car la génération du CV ne doit jamais
       // rester bloquée sur un serveur d'images lent ou injoignable.

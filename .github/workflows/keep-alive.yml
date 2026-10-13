@@ -1,0 +1,32 @@
+# Garde l'API gratuite éveillée.
+#
+# Render endort un service gratuit après 15 minutes sans visite ; le réveil
+# prend près d'une minute, et c'est souvent le recruteur qui l'attendrait.
+# Ce job appelle /health toutes les 10 minutes (et /health interroge la base,
+# ce qui la garde active elle aussi).
+#
+# Réglage : Settings > Secrets and variables > Actions > Variables >
+#   API_HEALTH_URL = https://<ton-api>.onrender.com/health
+#
+# GitHub peut retarder les tâches planifiées et les suspend après 60 jours
+# sans activité sur le dépôt : UptimeRobot (voir DEPLOIEMENT-GRATUIT.md)
+# reste le moyen principal, ce job est la ceinture en plus des bretelles.
+name: keep-alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: ${{ vars.API_HEALTH_URL != '' }}
+    steps:
+      - name: Appel de /health
+        env:
+          URL: ${{ vars.API_HEALTH_URL }}
+        run: curl --fail --silent --show-error --max-time 90 --retry 2 "$URL"

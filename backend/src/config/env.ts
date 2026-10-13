@@ -30,6 +30,9 @@ const envSchema = z.object({
 
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
 
+  // Nombre de proxies devant l'API (voir app.ts). 1 par défaut.
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(1),
+
   // Utilisés uniquement par prisma/seed.ts
   SEED_ADMIN_EMAIL: z.string().optional(),
   SEED_ADMIN_USERNAME: z.string().optional(),

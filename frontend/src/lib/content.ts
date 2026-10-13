@@ -54,3 +54,15 @@ export const monthYear = (value: string, lang: Lang = 'fr'): string => {
     year: 'numeric',
   });
 };
+
+/**
+ * Années écoulées depuis la date la plus ancienne de la liste.
+ * Déduites de la base plutôt qu'écrites en dur : le chiffre augmente tout
+ * seul avec le temps et ne devient jamais faux.
+ */
+export const yearsSince = (dates: string[]): number => {
+  const times = dates.map((d) => new Date(d).getTime()).filter((t) => !Number.isNaN(t));
+  if (times.length === 0) return 0;
+  const elapsed = Date.now() - Math.min(...times);
+  return Math.max(0, Math.floor(elapsed / (365.25 * 24 * 3600 * 1000)));
+};
