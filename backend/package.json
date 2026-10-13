@@ -15,7 +15,8 @@
     "db:reset": "prisma migrate reset",
     "db:generate": "prisma generate",
     "uploads:import": "tsx scripts/import-uploads.ts",
-    "db:copy": "tsx scripts/copy-database.ts"
+    "db:copy": "tsx scripts/copy-database.ts",
+    "admin:reset": "tsx scripts/reset-admin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
