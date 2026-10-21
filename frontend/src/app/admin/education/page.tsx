@@ -172,7 +172,7 @@ export default function EducationPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">Diplôme *</label>
-                <input required value={form.degreeFr} onChange={(e) => setForm({ ...form, degreeFr: e.target.value })} placeholder="Master professionnel en sécurité informatique et réseaux" className={inputClass} />
+                <input required value={form.degreeFr} onChange={(e) => setForm({ ...form, degreeFr: e.target.value })} placeholder="Master en systèmes d'information et sécurité des communications" className={inputClass} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

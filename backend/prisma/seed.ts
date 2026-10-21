@@ -65,12 +65,12 @@ async function main(): Promise<void> {
           en: 'Full-Stack Web & Mobile Developer',
         },
         bio: {
-          fr: "Développeur full-stack web et mobile (React.js, Vue.js, Node.js / NestJS, Flutter). Quatre applications conçues et développées de la base de données à l'interface, dont UniPay, plateforme de transfert d'argent et de paiement en ligne réalisée chez eScrutin. Formé en sécurité informatique et réseaux (master professionnel), j'aborde l'authentification, la protection des données et le déploiement comme des contraintes de conception, et non comme des correctifs de fin de projet. Je recherche un poste de développeur full-stack sur des produits en production.",
-          en: "Full-stack web and mobile developer (React.js, Vue.js, Node.js / NestJS, Flutter). Four applications designed and built from database to interface, including UniPay, a money transfer and online payment platform built at eScrutin. Trained in information security and networks (professional master's), I treat authentication, data protection and deployment as design constraints rather than end-of-project fixes.",
+          fr: "Développeur full-stack web et mobile (React.js, Vue.js, Node.js / NestJS, Flutter). Quatre applications conçues et développées de la base de données à l'interface, dont UniPay, plateforme de transfert d'argent et de paiement en ligne réalisée chez eScrutin. Titulaire d'un master en systèmes d'information et sécurité des communications (SISC), j'aborde l'authentification, la protection des données et le déploiement comme des contraintes de conception, et non comme des correctifs de fin de projet. Je recherche un poste de développeur full-stack sur des produits en production.",
+          en: "Full-stack web and mobile developer (React.js, Vue.js, Node.js / NestJS, Flutter). Four applications designed and built from database to interface, including UniPay, a money transfer and online payment platform built at eScrutin. With a master's degree in Information Systems and Communications Security (SISC), I treat authentication, data protection and deployment as design constraints rather than end-of-project fixes.",
         },
         titles: {
-          fr: ['Développeur Full-Stack', 'Ingénieur logiciel', 'Sécurité informatique & réseaux'],
-          en: ['Full-Stack Developer', 'Software Engineer', 'Information Security & Networks'],
+          fr: ['Développeur Full-Stack', 'Ingénieur logiciel', 'Sécurité des SI & des communications'],
+          en: ['Full-Stack Developer', 'Software Engineer', 'Information Systems & Communications Security'],
         },
         languages: [
           { name: 'Français', level: 'courant' },
@@ -249,8 +249,8 @@ async function main(): Promise<void> {
       data: [
         {
           degree: {
-            fr: 'Master professionnel en sécurité informatique et réseaux (SIR)',
-            en: "Professional Master's in Information Security and Networks",
+            fr: "Master en systèmes d'information et sécurité des communications (SISC)",
+            en: "Master's degree in Information Systems and Communications Security (SISC)",
           },
           school: 'Institut Universitaire des Bâtisseurs (IUB)',
           location: 'Dschang',

@@ -50,16 +50,20 @@ async function fixProfile() {
         fr:
           "Développeur full-stack web et mobile (React.js, Next.js, Vue.js, Node.js / NestJS, Flutter). Je conçois des applications de bout en bout, de la base de données à l'interface, jusqu'à leur mise en production. " +
           "Pendant mon stage chez eScrutin, j'ai développé GuidTique, une plateforme qui met en relation touristes et guides locaux. Aujourd'hui, je suis développeur full-stack Vue 3 / NestJS en télétravail pour Afrikedge, une entreprise basée à l'île Maurice, depuis le Cameroun. " +
-          "Formé en sécurité informatique et réseaux (master professionnel), j'aborde l'authentification, la protection des données et le déploiement comme des contraintes de conception, et non comme des correctifs de fin de projet. Ouvert à de nouvelles opportunités, en télétravail ou sur site.",
+          "Titulaire d'un master en systèmes d'information et sécurité des communications (SISC), j'aborde l'authentification, la protection des données et le déploiement comme des contraintes de conception, et non comme des correctifs de fin de projet. Ouvert à de nouvelles opportunités, en télétravail ou sur site.",
         en:
           'Full-stack web and mobile developer (React.js, Next.js, Vue.js, Node.js / NestJS, Flutter). I build applications end to end, from the database to the interface, all the way to production. ' +
           'During my internship at eScrutin, I developed GuidTique, a platform connecting tourists with local guides. Today I am a Vue 3 / NestJS full-stack developer working remotely from Cameroon for Afrikedge, a company based in Mauritius. ' +
-          "Trained in information security and networks (professional master's degree), I treat authentication, data protection and deployment as design constraints rather than end-of-project fixes. Open to new opportunities, remote or on site.",
+          "With a master's degree in Information Systems and Communications Security (SISC), I treat authentication, data protection and deployment as design constraints rather than end-of-project fixes. Open to new opportunities, remote or on site.",
       },
       languages,
+      titles: {
+        fr: ['Développeur Full-Stack', 'Ingénieur logiciel', 'Sécurité des SI & des communications'],
+        en: ['Full-Stack Developer', 'Software Engineer', 'Information Systems & Communications Security'],
+      },
     },
   });
-  log('profil : bio réécrite (FR/EN), langues traduites');
+  log('profil : bio réécrite (FR/EN), langues traduites, titres corrigés');
 }
 
 async function fixConfig() {
@@ -181,8 +185,8 @@ async function fixProjects() {
           en: "International money transfer, online payment and savings platform with a built-in conversational assistant. My master's final project.",
         },
         content: {
-          fr: "Projet de fin d'études de mon master professionnel en sécurité informatique et réseaux, à l'Institut Universitaire des Bâtisseurs (IUB). Conçu de bout en bout : interface, API et base de données.",
-          en: "Final project of my professional master's degree in information security and networks at the Institut Universitaire des Bâtisseurs (IUB). Built end to end: interface, API and database.",
+          fr: "Projet de fin d'études de mon master en systèmes d'information et sécurité des communications (SISC), à l'Institut Universitaire des Bâtisseurs (IUB). Conçu de bout en bout : interface, API et base de données.",
+          en: "Final project of my master's degree in Information Systems and Communications Security (SISC) at the Institut Universitaire des Bâtisseurs (IUB). Built end to end: interface, API and database.",
         },
         features: {
           fr: ["Transfert d'argent international", 'Paiement en ligne', 'Épargne', 'Assistant conversationnel', 'Tableau de bord'],
@@ -199,13 +203,17 @@ async function fixProjects() {
     await prisma.education.update({
       where: { id: master.id },
       data: {
+        degree: {
+          fr: "Master en systèmes d'information et sécurité des communications (SISC)",
+          en: "Master's degree in Information Systems and Communications Security (SISC)",
+        },
         description: {
           fr: "Projet de fin d'études : UniPay, plateforme de transfert d'argent, de paiement en ligne et d'épargne.",
           en: 'Final project: UniPay, a money transfer, online payment and savings platform.',
         },
       },
     });
-    log('master : projet de fin d\'études UniPay mentionné');
+    log('master : intitulé SISC corrigé, projet de fin d\'études UniPay mentionné');
   }
 
   const guidtique = await prisma.project.findUnique({ where: { slug: 'guidtique' } });
@@ -307,12 +315,12 @@ async function fixExperiences() {
 async function fixCoverLetters() {
   const replacements: Array<[RegExp, string]> = [
     [
-      /Titulaire d'un Master 2 en génie informatique, spécialité sécurité des systèmes d'information et des communications,/,
-      "Titulaire d'un master professionnel en sécurité informatique et réseaux,",
+      /Titulaire d'un (Master 2 en génie informatique, spécialité sécurité des systèmes d'information et des communications|master professionnel en sécurité informatique et réseaux),/,
+      "Titulaire d'un master en systèmes d'information et sécurité des communications (SISC),",
     ],
     [
-      /I hold a Master's degree in Computer Engineering, majoring in information systems and communications security, and/,
-      "I hold a professional Master's degree in Information Security and Networks, and",
+      /I hold a (Master's degree in Computer Engineering, majoring in information systems and communications security|professional Master's degree in Information Security and Networks), and/,
+      "I hold a Master's degree in Information Systems and Communications Security (SISC), and",
     ],
     [/sont disponibles à l'adresse indiquée ci-dessus\./, `sont disponibles sur ${SITE.replace('https://', '')}.`],
     [/are available at the address above\./, `are available at ${SITE.replace('https://', '')}.`],
