@@ -163,7 +163,7 @@ async function fixProjects() {
     log('projet « Admin Console » -> « Portfolio full-stack et back-office », vrai lien du site');
   }
 
-  /* UniPay : projet d'entreprise, donc sans faux liens et présenté comme confidentiel. */
+  /* UniPay : projet de fin d'études du master, sans les faux liens d'exemple. */
   const unipay =
     (await prisma.project.findUnique({ where: { slug: 'unipay-platform' } })) ??
     (await prisma.project.findUnique({ where: { slug: 'unipay' } }));
@@ -177,12 +177,12 @@ async function fixProjects() {
         demoUrl: null,
         order: 2,
         description: {
-          fr: "Plateforme de transfert d'argent à l'international, de paiement en ligne et d'épargne, avec assistant conversationnel intégré.",
-          en: 'International money transfer, online payment and savings platform with a built-in conversational assistant.',
+          fr: "Plateforme de transfert d'argent à l'international, de paiement en ligne et d'épargne, avec assistant conversationnel intégré. Mon projet de fin d'études de master.",
+          en: "International money transfer, online payment and savings platform with a built-in conversational assistant. My master's final project.",
         },
         content: {
-          fr: "Projet professionnel : le code et les maquettes restent confidentiels. Je peux en présenter l'architecture et mes choix techniques en entretien.",
-          en: 'Professional project: the code and designs remain confidential. I can walk through the architecture and my technical choices in an interview.',
+          fr: "Projet de fin d'études de mon master professionnel en sécurité informatique et réseaux, à l'Institut Universitaire des Bâtisseurs (IUB). Conçu de bout en bout : interface, API et base de données.",
+          en: "Final project of my professional master's degree in information security and networks at the Institut Universitaire des Bâtisseurs (IUB). Built end to end: interface, API and database.",
         },
         features: {
           fr: ["Transfert d'argent international", 'Paiement en ligne', 'Épargne', 'Assistant conversationnel', 'Tableau de bord'],
@@ -190,7 +190,22 @@ async function fixProjects() {
         },
       },
     });
-    log('projet UniPay : faux liens retirés, présenté comme projet d\'entreprise confidentiel');
+    log('projet UniPay : faux liens retirés, présenté comme projet de master');
+  }
+
+  /* Le master mentionne son projet de fin d'études : le CV imprime cette description. */
+  const master = await prisma.education.findFirst({ where: { school: { contains: 'Bâtisseurs' } } });
+  if (master) {
+    await prisma.education.update({
+      where: { id: master.id },
+      data: {
+        description: {
+          fr: "Projet de fin d'études : UniPay, plateforme de transfert d'argent, de paiement en ligne et d'épargne.",
+          en: 'Final project: UniPay, a money transfer, online payment and savings platform.',
+        },
+      },
+    });
+    log('master : projet de fin d\'études UniPay mentionné');
   }
 
   const guidtique = await prisma.project.findUnique({ where: { slug: 'guidtique' } });
