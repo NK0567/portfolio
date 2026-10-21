@@ -278,9 +278,9 @@ export const LETTER_TEMPLATES: Record<Lang, {
     salutation: 'Madame, Monsieur,',
     body: [
       "Votre annonce pour le poste de {{poste}} a retenu mon attention parce que [point précis : un produit, une techno de votre stack, un enjeu que vous citez]. C'est exactement le type de sujet sur lequel je travaille depuis [X] ans, et la raison pour laquelle je vous écris aujourd'hui plutôt qu'à une autre entreprise.",
-      "Titulaire d'un Master 2 en génie informatique, spécialité sécurité des systèmes d'information et des communications, je conçois des applications de bout en bout : interfaces Next.js et Flutter, API Node.js et NestJS, modélisation de données et mise en production. Sur [projet le plus proche de leur besoin], j'ai [résultat mesurable : temps de réponse divisé par deux, X utilisateurs, telle fonctionnalité livrée en N semaines].",
+      "Titulaire d'un master professionnel en sécurité informatique et réseaux, je conçois des applications de bout en bout : interfaces Next.js et Flutter, API Node.js et NestJS, modélisation de données et mise en production. Sur [projet le plus proche de leur besoin], j'ai [résultat mesurable : temps de réponse divisé par deux, X utilisateurs, telle fonctionnalité livrée en N semaines].",
       "Ce que je peux apporter à {{entreprise}} tient en trois points : une habitude du code lisible et testé plutôt que du code livré vite, une sensibilité à la sécurité acquise en formation et appliquée dès la conception, et l'expérience de l'enseignement, qui oblige à expliquer clairement ses choix techniques à ceux qui ne les partagent pas encore.",
-      "Je serais heureux de vous exposer tout cela de vive voix et de répondre à vos questions. Mon portfolio et mes réalisations détaillées sont disponibles à l'adresse indiquée ci-dessus.",
+      "Je serais heureux de vous exposer tout cela de vive voix et de répondre à vos questions. Mon portfolio et mes réalisations détaillées sont disponibles sur boris-kalefack-portfolio.vercel.app.",
     ],
     closing:
       "Dans l'attente de votre retour, je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.",
@@ -291,9 +291,9 @@ export const LETTER_TEMPLATES: Record<Lang, {
     salutation: 'Dear Hiring Manager,',
     body: [
       "Your opening for the {{position}} role caught my attention because of [specific detail: a product, a technology in your stack, a challenge you mention]. That is precisely the kind of problem I have been working on for the past [X] years, and the reason I am writing to you rather than to another company.",
-      "I hold a Master's degree in Computer Engineering, majoring in information systems and communications security, and I build applications end to end: Next.js and Flutter interfaces, Node.js and NestJS APIs, data modelling and deployment. On [closest project to their need], I [measurable outcome: halved response times, X users, feature shipped in N weeks].",
+      "I hold a professional Master's degree in Information Security and Networks, and I build applications end to end: Next.js and Flutter interfaces, Node.js and NestJS APIs, data modelling and deployment. On [closest project to their need], I [measurable outcome: halved response times, X users, feature shipped in N weeks].",
       "What I can bring to {{company}} comes down to three things: a habit of writing readable, tested code rather than fast code, a security mindset acquired through formal training and applied from the design stage, and teaching experience, which forces you to explain technical choices clearly to people who do not share them yet.",
-      "I would welcome the opportunity to discuss this with you and answer your questions. My portfolio and detailed work are available at the address above.",
+      "I would welcome the opportunity to discuss this with you and answer your questions. My portfolio and detailed work are available at boris-kalefack-portfolio.vercel.app.",
     ],
     closing: 'Thank you for your time and consideration. I look forward to hearing from you.',
   },
