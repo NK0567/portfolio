@@ -25,9 +25,9 @@ const SITE = 'https://boris-kalefack-portfolio.vercel.app';
  * l'expérience correspondante n'est ni créée ni redatée.
  */
 const DATES = {
-  escrutin: { start: null as string | null, end: null as string | null },
+  escrutin: { start: '2025-08-11' as string | null, end: '2025-11-21' as string | null },
   irex: { start: null as string | null, end: null as string | null },
-  afrikedge: { start: null as string | null },
+  afrikedge: { start: '2026-07-27' as string | null },
 };
 
 const log = (message: string) => console.log(`  ${message}`);
@@ -49,11 +49,11 @@ async function fixProfile() {
       bio: {
         fr:
           "Développeur full-stack web et mobile (React.js, Next.js, Vue.js, Node.js / NestJS, Flutter). Je conçois des applications de bout en bout, de la base de données à l'interface, jusqu'à leur mise en production. " +
-          "Pendant mon stage chez eScrutin, j'ai développé UniPay, une plateforme de transfert d'argent et de paiement en ligne. Aujourd'hui, je travaille en télétravail depuis le Cameroun pour Afrikedge, une entreprise basée à l'île Maurice. " +
+          "Pendant mon stage chez eScrutin, j'ai développé GuidTique, une plateforme qui met en relation touristes et guides locaux. Aujourd'hui, je suis développeur full-stack Vue 3 / NestJS en télétravail pour Afrikedge, une entreprise basée à l'île Maurice, depuis le Cameroun. " +
           "Formé en sécurité informatique et réseaux (master professionnel), j'aborde l'authentification, la protection des données et le déploiement comme des contraintes de conception, et non comme des correctifs de fin de projet. Ouvert à de nouvelles opportunités, en télétravail ou sur site.",
         en:
           'Full-stack web and mobile developer (React.js, Next.js, Vue.js, Node.js / NestJS, Flutter). I build applications end to end, from the database to the interface, all the way to production. ' +
-          'During my internship at eScrutin, I developed UniPay, a money transfer and online payment platform. Today I work remotely from Cameroon for Afrikedge, a company based in Mauritius. ' +
+          'During my internship at eScrutin, I developed GuidTique, a platform connecting tourists with local guides. Today I am a Vue 3 / NestJS full-stack developer working remotely from Cameroon for Afrikedge, a company based in Mauritius. ' +
           "Trained in information security and networks (professional master's degree), I treat authentication, data protection and deployment as design constraints rather than end-of-project fixes. Open to new opportunities, remote or on site.",
       },
       languages,
@@ -175,15 +175,14 @@ async function fixProjects() {
         title: 'UniPay',
         githubUrl: null,
         demoUrl: null,
-        order: 1,
-        ...(DATES.escrutin.end ? { date: new Date(DATES.escrutin.end) } : {}),
+        order: 2,
         description: {
-          fr: "Plateforme de transfert d'argent à l'international, de paiement en ligne et d'épargne, avec assistant conversationnel intégré. Développée pendant mon stage chez eScrutin.",
-          en: 'International money transfer, online payment and savings platform with a built-in conversational assistant. Developed during my internship at eScrutin.',
+          fr: "Plateforme de transfert d'argent à l'international, de paiement en ligne et d'épargne, avec assistant conversationnel intégré.",
+          en: 'International money transfer, online payment and savings platform with a built-in conversational assistant.',
         },
         content: {
-          fr: "Projet réalisé pour eScrutin : le code et les maquettes appartiennent à l'entreprise et restent confidentiels. Je peux en présenter l'architecture et mes choix techniques en entretien.",
-          en: 'Project built for eScrutin: the code and designs belong to the company and remain confidential. I can walk through the architecture and my technical choices in an interview.',
+          fr: "Projet professionnel : le code et les maquettes restent confidentiels. Je peux en présenter l'architecture et mes choix techniques en entretien.",
+          en: 'Professional project: the code and designs remain confidential. I can walk through the architecture and my technical choices in an interview.',
         },
         features: {
           fr: ["Transfert d'argent international", 'Paiement en ligne', 'Épargne', 'Assistant conversationnel', 'Tableau de bord'],
@@ -199,10 +198,11 @@ async function fixProjects() {
     await prisma.project.update({
       where: { id: guidtique.id },
       data: {
-        order: 2,
+        order: 1,
+        date: new Date('2025-11-21'),
         description: {
-          fr: 'Plateforme qui met en relation les touristes et les guides locaux.',
-          en: 'Platform that connects tourists with local guides.',
+          fr: 'Plateforme qui met en relation les touristes et les guides locaux. Projet de fin de stage réalisé chez eScrutin.',
+          en: 'Platform that connects tourists with local guides. End-of-internship project built at eScrutin.',
         },
       },
     });
@@ -217,6 +217,14 @@ async function fixExperiences() {
       where: { id: escrutin.id },
       data: {
         role: { fr: 'Stagiaire développeur full-stack', en: 'Full-stack developer intern' },
+        description: {
+          fr: 'Stage de 4 mois : conception et développement de GuidTique, projet de fin de stage.',
+          en: '4-month internship: design and development of GuidTique, my end-of-internship project.',
+        },
+        achievements: {
+          fr: ['Conçu et développé GuidTique, plateforme de mise en relation entre touristes et guides locaux (React, Chakra UI, Node.js, Express, Prisma, MySQL)'],
+          en: ['Designed and built GuidTique, a platform connecting tourists with local guides (React, Chakra UI, Node.js, Express, Prisma, MySQL)'],
+        },
         ...(DATES.escrutin.start && DATES.escrutin.end
           ? { startDate: new Date(DATES.escrutin.start), endDate: new Date(DATES.escrutin.end), isCurrent: false }
           : {}),
@@ -237,18 +245,18 @@ async function fixExperiences() {
   if (DATES.afrikedge.start) {
     await upsert('Afrikedge', {
       location: 'Télétravail depuis le Cameroun (entreprise à Maurice)',
-      role: { fr: 'Développeur full-stack (télétravail)', en: 'Full-stack developer (remote)' },
+      role: { fr: 'Développeur full-stack Vue 3 / NestJS (télétravail)', en: 'Vue 3 / NestJS full-stack developer (remote)' },
       description: {
         fr: "Développement et livraison de projets web pour une entreprise basée à l'île Maurice, entièrement à distance.",
         en: 'Building and delivering web projects for a Mauritius-based company, fully remote.',
       },
       achievements: {
         fr: [
-          "Conception et livraison de projets web de bout en bout pour une entreprise basée à l'île Maurice",
+          "Conception et livraison de projets web de bout en bout en Vue 3 et NestJS pour une entreprise basée à l'île Maurice",
           'Travail 100 % à distance : organisation autonome, livraisons régulières, communication asynchrone',
         ],
         en: [
-          'Designed and delivered end-to-end web projects for a Mauritius-based company',
+          'Designed and delivered end-to-end web projects with Vue 3 and NestJS for a Mauritius-based company',
           'Fully remote: self-organised work, regular deliveries, asynchronous communication',
         ],
       },
